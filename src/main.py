@@ -29,18 +29,32 @@ def main(args):
 
     param_grid = {
             'learning_rate': [0.1],
-            'n_estimators': [70],
-            'scale_pos_weight': [3, 5]
+            'n_estimators': [1000],
+            'scale_pos_weight': [3, 5, 70, 100]
             }
 
-    gbm = GridSearchCV(estimator, param_grid, scoring='f1')
+    gbm = GridSearchCV(estimator, 
+                       param_grid, 
+                       cv = 10,
+                       scoring='f1', 
+                       return_train_score = True,
+                       n_jobs = -1)
     gbm.fit(x_train, y_train, eval_set=[(x_test, y_test)], eval_metric=lgb_f1_score, early_stopping_rounds=5, categorical_feature='auto')
-
+    
+    # cross-validation result
+    df = pd.DataFrame(gbm.cv_results_)
+    df.sort_values(by = "mean_test_score", inplace =True)
+    df.to_csv(args.logs_path, index=False)
+    mean_test_score = df.iloc[0].mean_test_score
+    std_test_score = df.iloc[0].std_test_score
+    print ("10-fold validating result on best paras : {} with +/- {}".format(round(mean_test_score, 4), round(std_test_score,4)))
+    
+    # loading testing data 
     df_test = pd.read_csv(args.test_file)
     for cat in CATEGORY:
         df_test[cat] = df_test[cat].astype('category')
 
-    
+    # prediction
     result = gbm.predict(df_test)
     df_label = pd.DataFrame(result, columns=['fraud_ind'])
     df = pd.merge(df_test, df_label, left_index=True, right_index=True)
@@ -51,6 +65,7 @@ if __name__ == '__main__':
 
     parser.add_argument('train_file')
     parser.add_argument('test_file')
+    parser.add_argument('logs_path')
     parser.add_argument('result_path')
-    
+
     main(parser.parse_args())
