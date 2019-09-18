@@ -11,3 +11,4 @@ __pycache__/
 ### dir ###
 result/
 data/test.zip
+data/train.zip
