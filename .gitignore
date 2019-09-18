@@ -9,5 +9,5 @@ __pycache__/
 *$py.class
 
 ### dir ###
-result
-data
+result/
+data/
