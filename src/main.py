@@ -10,7 +10,7 @@ import lightgbm as lgb
 from sklearn.metrics import f1_score
 import numpy as np
 #from keras.models import load_model
-from util import s_to_time_format, string_to_datetime
+from util import s_to_time_format, string_to_datetime, hour_to_range
 import gc
 
 os.environ["CUDA_VISIBLE_DEVICES"]="0"
@@ -98,10 +98,12 @@ def main(args):
         df["loctm_"] = df.loctm.astype(int).astype(str)
         df.loctm_ = df.loctm_.apply(s_to_time_format).apply(string_to_datetime)
         # time-related feature
-        df["loctm_hour_of_day"] = df.loctm_.apply(lambda x: x.hour)
-        df["loctm_minute_of_hour"] = df.loctm_.apply(lambda x: x.minute)
-        df["loctm_second_of_min"] = df.loctm_.apply(lambda x: x.second)
-        df["loctm_absolute_time"] = [h*60+m for h,m in zip(df.loctm_hour_of_day,df.loctm_minute_of_hour)]
+        df["hour_range"] = df.loctm_.apply(lambda x: hour_to_range(x.hour)).astype("category")
+        #df["loctm_hour_of_day"] = df.loctm_.apply(lambda x: x.hour)
+        #df["loctm_minute_of_hour"] = df.loctm_.apply(lambda x: x.minute)
+        #df["loctm_second_of_min"] = df.loctm_.apply(lambda x: x.second)
+        #df["loctm_absolute_time"] = [h*60+m for h,m in zip(df.loctm_hour_of_day,df.loctm_minute_of_hour)]
+
         # removed the columns no need
         df.drop(columns = ["loctm_"], axis = 1, inplace = True)
         

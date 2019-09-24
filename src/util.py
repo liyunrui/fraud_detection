@@ -50,3 +50,18 @@ def string_to_datetime(datetime_str):
     from datetime import datetime
     datetime_object = datetime.strptime(datetime_str, '%H:%M:%S')
     return datetime_object
+
+def hour_to_range(hr):
+    if hr > 22 and hr <= 3:
+        return 'midnight'
+    elif hr > 3 and hr <= 7:
+        return 'early_morning'
+    elif hr > 7 and hr <= 11:
+        return 'morning'
+    elif hr > 11 and hr <= 14:
+        return 'noon'
+    elif hr >14 and hr <= 17:
+        return 'afternoon'
+    else:
+        return 'night'
+
