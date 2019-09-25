@@ -13,5 +13,5 @@ result/
 data/
 data/test.zip
 data/train.zip
-src/__pycache__/
+
 
