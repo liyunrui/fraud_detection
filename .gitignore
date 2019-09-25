@@ -1,7 +1,7 @@
 
 ### macOS ###
 .DS_Store
-
+._.DS_Store
 ### Python ###
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -13,3 +13,5 @@ result/
 data/
 data/test.zip
 data/train.zip
+src/__pycache__/
+

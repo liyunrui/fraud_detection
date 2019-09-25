@@ -1,13 +1,13 @@
-### How to build
-1. Please create a folder named data in current path and put train.zip and test.zip into the folder.
-2. Run
-```
-bash build.sh
-```
-
 ### How to run
+
+0. Please create a folder named dataset in current path and put train.csv and test.csv into this folder
+
 1. Run
 ```
-bash run.sh
+make train
 ```
-2. Result will be saved to `result/submission.csv`
+By defualt, it will generate the below file in ./result 
+1.submission.csv`
+2.log
+3.feature_importance.csv
+4.lgbm_importances.png
