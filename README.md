@@ -9,7 +9,7 @@ make train
 ### Reuslt
 By defualt, it will generate the below file in a folder called result
 
-* submission.csv`
+* submission.csv
 * log
 * feature_importance.csv
 * lgbm_importances.png
