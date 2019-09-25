@@ -12,8 +12,8 @@ import numpy as np
 #from keras.models import load_model
 from util import s_to_time_format, string_to_datetime
 import gc
-
-os.environ["CUDA_VISIBLE_DEVICES"]="0"
+from sklearn.model_selection import TimeSeriesSplit
+#os.environ["CUDA_VISIBLE_DEVICES"]="0"
 
 CATEGORY = ['ecfg', 'flbmk', 'flg_3dsmk', 'insfg', 'ovrlt', 'scity', 'csmcu', 'cano', 'mchno', 'hcefg', 'bacno', 'contp', 'etymd', 'acqic']
 
@@ -92,16 +92,16 @@ def main(args):
     for cat in CATEGORY:
         df_train[cat] = df_train[cat].astype('category')#.cat.codes
         df_test[cat] = df_test[cat].astype('category')
-
+    print ("num_features", df_train.shape[1])
     for df in [df_train, df_test]:
         # pre-processing
         df["loctm_"] = df.loctm.astype(int).astype(str)
         df.loctm_ = df.loctm_.apply(s_to_time_format).apply(string_to_datetime)
         # time-related feature
-        df["loctm_hour_of_day"] = df.loctm_.apply(lambda x: x.hour)
-        df["loctm_minute_of_hour"] = df.loctm_.apply(lambda x: x.minute)
-        df["loctm_second_of_min"] = df.loctm_.apply(lambda x: x.second)
-        df["loctm_absolute_time"] = [h*60+m for h,m in zip(df.loctm_hour_of_day,df.loctm_minute_of_hour)]
+        df["loctm_hour_of_day"] = df.loctm_.apply(lambda x: x.hour).astype('category')
+        #df["loctm_minute_of_hour"] = df.loctm_.apply(lambda x: x.minute)
+        #df["loctm_second_of_min"] = df.loctm_.apply(lambda x: x.second)
+        #df["loctm_absolute_time"] = [h*60+m for h,m in zip(df.loctm_hour_of_day,df.loctm_minute_of_hour)]
         # removed the columns no need
         df.drop(columns = ["loctm_"], axis = 1, inplace = True)
         
@@ -110,7 +110,7 @@ def main(args):
 
     del df
     gc.collect()
-
+    print ("num_features", df_train.shape[1])
     y_train = df_train['fraud_ind']
     x_train = df_train.drop('fraud_ind', axis=1)
 
@@ -152,7 +152,7 @@ def main(args):
                        scoring='f1', 
                        return_train_score = True,
                        n_jobs = -1)
-    gbm.fit(x_train, y_train, eval_set=[(x_test, y_test)], eval_metric=lgb_f1_score, early_stopping_rounds=5, categorical_feature='auto')
+    gbm.fit(x_train, y_train, eval_metric=lgb_f1_score, early_stopping_rounds=5, categorical_feature='auto', validation_fraction = 0.2)
     
     # cross-validation result
     df = pd.DataFrame(gbm.cv_results_)
