@@ -6,7 +6,8 @@
 ```
 make train
 ```
-By defualt, it will generate the below file in ./result 
+3. By defualt, it will generate the below file in ./result 
+
 1.submission.csv`
 2.log
 3.feature_importance.csv
