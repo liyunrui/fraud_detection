@@ -6,14 +6,70 @@ import pandas as pd
 import tensorflow as tf
 import os
 from sklearn import preprocessing
-from sklearn.preprocessing import MinMaxScaler, MaxAbsScaler
-
-os.environ["CUDA_VISIBLE_DEVICES"]="0"
-
+from util import s_to_time_format, string_to_datetime,hour_to_range
 from keras.models import load_model
 from keras.callbacks import ModelCheckpoint, TensorBoard, EarlyStopping
 from keras import regularizers
-import gc
+os.environ["CUDA_VISIBLE_DEVICES"]="0"
+
+from tqdm import tqdm
+
+def value_to_count(df_train, df_test, mode = "train"):
+
+    # continuous_feats = ["locdt","conam","loctm_hour_of_day",
+    #                 "loctm_minute_of_hour","loctm_second_of_min"]
+
+    # feats = [f for f in df_test.columns.tolist() if f not in continuous_feats]
+    feats = ['acqic', 'bacno', 'cano', 'conam', 'contp', 'csmcu', 'ecfg', 'etymd',
+       'flbmk', 'flg_3dsmk', 'hcefg', 'insfg', 'iterm', 'mcc',
+       'mchno', 'ovrlt', 'scity', 'stocn', 'stscd']
+
+    df = pd.concat([df_train[feats], df_test[feats]], axis = 0)
+    df_train_ = pd.DataFrame()
+    df_test_ = pd.DataFrame()
+    for f in tqdm(feats):
+        count_dict = df[f].value_counts(dropna = False).to_dict() 
+        df_train_[f] = df_train[f].apply(lambda v: count_dict[v])
+        df_test_[f] = df_test[f].apply(lambda v: count_dict[v])
+    continuous_feats = ['locdt', 'loctm_hour_of_day', 'loctm_minute_of_hour', 'loctm_second_of_min']
+    for f in tqdm(continuous_feats):
+        df_train_[f] = df_train[f]
+        df_test_[f] = df_test[f]
+        
+    if mode == 'train':
+        df_train_["fraud_ind"] = df_train["fraud_ind"]
+
+    return df_train_, df_test_
+
+def feature_normalization_auto(df_train, df_test, mode = "train"):
+    """
+    return two inputs of autoencoder, one is for train and another one is for test
+    """
+    from sklearn.preprocessing import MinMaxScaler, MaxAbsScaler
+    feats = ['acqic', 'bacno', 'cano', 'conam', 'contp', 'csmcu', 'ecfg', 'etymd',
+       'flbmk', 'flg_3dsmk', 'hcefg', 'insfg', 'iterm', 'locdt', 'mcc',
+       'mchno', 'ovrlt', 'scity', 'stocn', 'stscd', 'loctm_hour_of_day',
+       'loctm_minute_of_hour', 'loctm_second_of_min']
+    scaler = MinMaxScaler()
+    df = pd.concat([df_train[feats], df_test[feats]], axis = 0)
+
+    data = df[feats]
+    scaler.fit(data)
+    
+    if mode == 'train':
+        X_train = df_train[df_train.fraud_ind == 0]
+        
+        X_train = X_train[feats]
+        X_test = df_test[feats]
+        
+        X_train = scaler.transform(X_train)
+        X_test = scaler.transform(X_test)
+
+    else:
+        X_train = scaler.transform(df_train[feats])
+        X_test = scaler.transform(df_test[feats])
+    
+    return X_train, X_test
 
 def autoencoder(input_dim, encoding_dim):
     """
@@ -68,67 +124,42 @@ def build_model(autoencoder,X_train,X_test,nb_epoch = 100,batch_size = 32):
                         batch_size=batch_size,
                         shuffle=True,
                         validation_data=(X_test, X_test),
-                        verbose=1,
+                        verbose=0,
                         callbacks=[checkpointer, earlystopper]).history
     return history
 
 
-train = pd.read_csv("/data/yunrui_li/fraud/dataset/train.csv")
-test = pd.read_csv("/data/yunrui_li/fraud/dataset/test.csv")
+
+if __name__ == '__main__':
+    df_train = pd.read_csv("/data/yunrui_li/fraud/dataset/train.csv")
+    df_test = pd.read_csv("/data/yunrui_li/fraud/dataset/test.csv")
 
 
-CATEGORY = ['ecfg', 'flbmk', 'flg_3dsmk', 'insfg', 
-            'ovrlt', 'scity', 'csmcu', 'cano', 
-            'mchno', 'hcefg', 'bacno', 'contp', 'etymd', 'acqic']
+    for df in [df_train, df_test]:
+        # pre-processing
+        df["loctm_"] = df.loctm.astype(int).astype(str)
+        df.loctm_ = df.loctm_.apply(s_to_time_format).apply(string_to_datetime)
+        # time-related feature
+        df["loctm_hour_of_day"] = df.loctm_.apply(lambda x: x.hour).astype('category')
+        df["loctm_minute_of_hour"] = df.loctm_.apply(lambda x: x.minute)
+        df["loctm_second_of_min"] = df.loctm_.apply(lambda x: x.second)
+        
+        # removed the columns no need
+        df.drop(columns = ["loctm_", "loctm","txkey"], axis = 1, inplace = True)
+
+    df_train, df_test = value_to_count(df_train, df_test)
 
 
-X_train = train[train.fraud_ind == 0]
-X_train = X_train.drop(['fraud_ind'], axis=1)
-X_train = X_train.drop(['txkey'], axis=1)
+    X_train, X_test = feature_preprocessing_auto(df_train, df_test)
 
-X_test = test
-X_test = X_test.drop(['txkey'], axis=1)
-
-
-CATEGORY = ['ecfg', 'flbmk', 'flg_3dsmk', 'insfg', 
-            'ovrlt', 'scity', 'csmcu', 'cano', 
-            'mchno', 'hcefg', 'bacno', 'contp', 'etymd', 'acqic']
-
-df = pd.concat([train, test], axis = 0)
-for cat in CATEGORY:
-    le = preprocessing.LabelEncoder()
-    le.fit(df[cat].tolist())
-    df[cat] = le.transform(df[cat].tolist())
-    X_train[cat] = le.transform(X_train[cat].tolist()) 
-    X_test[cat] = le.transform(X_test[cat].tolist()) 
-
-print ("=" * 100)
-print ("finished label encoding")
-
-del train,test
-gc.collect()
-
-scaler = MinMaxScaler()
-data = df[X_train.columns.tolist()]
-scaler.fit(data)
-
-X_train = X_train.values
-X_test = X_test.values
-
-X_train = scaler.transform(X_train)
-X_test = scaler.transform(X_test)
-
-del df, data
-gc.collect()
-
-input_dim = X_train.shape[1]
-encoding_dim = 14
-print ('number of raw features', input_dim)
-print ('number of normal data', X_train.shape[0])
+    input_dim = X_train.shape[1]
+    encoding_dim = 14
+    print ('number of raw features', input_dim)
+    print ('number of normal data', X_train.shape[0])
 
 
-autoencoder = autoencoder(input_dim, encoding_dim)
+    autoencoder = autoencoder(input_dim, encoding_dim)
 
-print (autoencoder.summary())
+    print (autoencoder.summary())
 
-history = build_model(autoencoder,X_train,X_test,nb_epoch = 100,batch_size = 32)
+    history = build_model(autoencoder,X_train,X_test,nb_epoch = 100, batch_size = 32)

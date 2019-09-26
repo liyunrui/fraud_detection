@@ -20,11 +20,63 @@ import sys
 
 CATEGORY = ['ecfg', 'flbmk', 'flg_3dsmk', 'insfg', 'ovrlt', 'scity', 'csmcu', 'cano', 'mchno', 'hcefg', 'bacno', 'contp', 'etymd', 'acqic']
 
+AGG_RECIPE = [
+    (["cano"], [
+            ('conam', 'min'),
+            ('conam', 'max'),
+            ('conam', 'mean'),
+            ('conam', 'median'),
+            ('conam', 'var'),
+            ('conam', 'sum'),
+        ]),
+
+    (["bacno","cano"], [
+        ('conam', 'min'),
+        ('conam', 'max'),
+        ('conam', 'mean'),
+        ('conam', 'median'),
+        ('conam', 'var'),
+        ('conam', 'sum'),
+    ]),
+]
+
 # logging
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 logger.addHandler(logging.StreamHandler(sys.stdout))
 
+def group_target_by_cols(df_train, df_test, recipe):
+    df = pd.concat([df_train, df_test], axis = 0)
+    for m in range(len(recipe)):
+        cols = recipe[m][0]
+        for n in range(len(recipe[m][1])):
+            target = recipe[m][1][n][0]
+            method = recipe[m][1][n][1]
+            name_grouped_target = method+"_"+target+'_BY_'+'_'.join(cols)
+            tmp = df[cols + [target]].groupby(cols).agg(method)
+            tmp = tmp.reset_index().rename(index=str, columns={target: name_grouped_target})
+            df_train = df_train.merge(tmp, how='left', on=cols)
+            df_test = df_test.merge(tmp, how='left', on=cols)
+    del tmp
+    gc.collect()
+    
+    return df_train, df_test
+
+def add_auto_encoder_feature(df_raw, df, autoencoder, add_reconstructed_vec = True):
+
+    predictions = autoencoder.predict(df) # get reconstructed vector, 2-D, [num_samples, num_features]
+    mse = np.mean(np.power(df - predictions, 2), axis=1) # get reconstructed error, 1-D, [num_samples,]
+
+    if add_reconstructed_vec == True:
+        df = pd.DataFrame(predictions, columns=["reconstructed_dim_{}".format(i) for i in range(predictions.shape[1])])
+        df["reconstruction_error"] = mse
+    else:
+        df = pd.DataFrame({"reconstruction_error": mse})
+    out = pd.concat([df_raw.reset_index(drop = True), df.reset_index(drop = True)], axis = 1)
+
+    assert len(out)==len(df_raw)==len(df), "it should be same"
+
+    return out
 
 def lgb_f1_score(y_true, y_pred):
     y_hat = np.round(y_pred)
@@ -61,14 +113,14 @@ def kfold_lightgbm(df_train, df_test, num_folds, args, stratified = False, seed 
                 n_estimators=10000,
                 learning_rate=0.02,
                 num_leaves=127,
-                max_depth=MAX_DEPTH,
+                max_depth=args.MAX_DEPTH,
                 silent=-1,
                 verbose=-1,
-                random_state=seed,
+                random_state=args.seed,
                 )
         else:
             clf = lgb.LGBMClassifier(
-                nthread=int(multiprocessing.cpu_count()*args.CPU_USE_RATE),
+                n_jobs = -1,
                 n_estimators=10000,
                 learning_rate=0.02, # 0.02
                 num_leaves=args.NUM_LEAVES,
@@ -90,7 +142,7 @@ def kfold_lightgbm(df_train, df_test, num_folds, args, stratified = False, seed 
                 train_y, 
                 eval_set=[(train_x, train_y), (valid_x, valid_y)], 
                 eval_metric= lgb_f1_score, 
-                verbose= False, 
+                verbose= True, 
                 early_stopping_rounds= 100, 
                 categorical_feature='auto') # early_stopping_rounds= 200
         # probabilty belong to class1(fraud)
@@ -146,35 +198,60 @@ def main(args):
             df_train[cat] = df_train[cat].astype('category')#.cat.codes
             df_test[cat] = df_test[cat].astype('category')
             
-        logger.info("Train application df shape:", df_train.shape)
-        logger.info("Test application df shape:", df_test.shape)
         
         for df in [df_train, df_test]:
             # pre-processing
             df["loctm_"] = df.loctm.astype(int).astype(str)
             df.loctm_ = df.loctm_.apply(s_to_time_format).apply(string_to_datetime)
-            # time-related feature
-            df["loctm_hour_of_day"] = df.loctm_.apply(lambda x: x.hour).astype('category')
-            #df["loctm_minute_of_hour"] = df.loctm_.apply(lambda x: x.minute)
-            #df["loctm_second_of_min"] = df.loctm_.apply(lambda x: x.second)
+            # # time-related feature
+            # df["loctm_hour_of_day"] = df.loctm_.apply(lambda x: x.hour).astype('category')
+            # df["loctm_minute_of_hour"] = df.loctm_.apply(lambda x: x.minute)
+            # df["loctm_second_of_min"] = df.loctm_.apply(lambda x: x.second)
             #df["loctm_absolute_time"] = [h*60+m for h,m in zip(df.loctm_hour_of_day,df.loctm_minute_of_hour)]
             df["hour_range"] = df.loctm_.apply(lambda x: hour_to_range(x.hour)).astype("category")
             # removed the columns no need
             df.drop(columns = ["loctm_"], axis = 1, inplace = True)
-        logger.info("Train application df shape:", df_train.shape)
-        logger.info("Test application df shape:", df_test.shape)
+        logger.info("Train application df shape: {}".format(df_train.shape))
+        logger.info("Test application df shape: {}".format(df_test.shape))
+
+    with timer("Add bacno/cano feature"):
+        df_train, df_test = group_target_by_cols(df_train, df_test, AGG_RECIPE)
+
+        logger.info("Train application df shape: {}".format(df_train.shape))
+        logger.info("Test application df shape: {}".format(df_test.shape))
+
+    # with timer("Add autoencoder feature"):
+    #     from keras.models import load_model
+    #     from autoencoder import value_to_count, feature_normalization_auto
+
+    #     autoencoder = load_model('/data/yunrui_li/fraud/fraud_detection/models/auto_encoder.h5')
+
+    #     df_train_, df_test_ = value_to_count(df_train, df_test, mode = "test")
+    #     X_train, X_test = feature_normalization_auto(df_train_, df_test_, mode = "test")
+
+    #     df_train = add_auto_encoder_feature(df_train,X_train, autoencoder, add_reconstructed_vec = True)
+    #     df_test = add_auto_encoder_feature(df_test,X_test, autoencoder, add_reconstructed_vec = True)
+    #     for df in [df_train, df_test]:
+    #         df.drop(columns = ["loctm_hour_of_day","loctm_minute_of_hour", "loctm_second_of_min"], axis = 1, inplace = True)
+
+    #     del df_train_, df_test_, X_train, X_test 
+    #     gc.collect()
+
+    #     logger.info("Train application df shape: {}".format(df_train.shape))
+    #     logger.info("Test application df shape: {}".format(df_test.shape))
+
     with timer("Run LightGBM with kfold"):
-        if args.feature_selection == True:
+        if args.feature_selection:
             for df in [df_train, df_test]:
                 # drop random features (by null hypothesis)
                 df.drop(FEATURE_GRAVEYARD, axis=1, inplace=True, errors='ignore')
 
-                # drop unused features
-                # df.drop(features_with_no_imp_at_least_twice, axis=1, inplace=True, errors='ignore')
+                # drop unused featuresfeatures_with_no_imp_at_least_twice
+                # df.drop(, axis=1, inplace=True, errors='ignore')
 
                 gc.collect()   
-        logger.info("Train application df shape:", df_train.shape)
-        logger.info("Test application df shape:", df_test.shape)    
+            logger.info("Train application df shape: {}".format(df_train.shape))
+            logger.info("Test application df shape: {}".format(df_test.shape))
         
         
         ITERATION = (80 if args.TEST_NULL_HYPO else 1)
@@ -186,7 +263,7 @@ def main(args):
             feature_importance_df = pd.concat([feature_importance_df, iter_feat_imp], axis=0)
             over_iterations_val_auc[i] = over_folds_val_auc
 
-        logger.info('============================================\nOver-iterations val AUC score %.6f' %over_iterations_val_auc.mean())
+        logger.info('============================================\nOver-iterations val f1 score %.6f' %over_iterations_val_auc.mean())
         logger.info('Standard deviation %.6f\n============================================' %over_iterations_val_auc.std())
     
     if args.feature_importance_plot == True:
@@ -197,9 +274,9 @@ def main(args):
     feature_importance_df_mean = feature_importance_df[["feature", "importance"]].groupby("feature").mean().sort_values(by="importance", ascending=False)
 
     if args.TEST_NULL_HYPO:
-        feature_importance_df_mean.to_csv("feature_importance-null_hypo.csv", index = True)
+        feature_importance_df_mean.to_csv("../result/feature_importance-null_hypo.csv", index = True)
     else:
-        feature_importance_df_mean.to_csv("feature_importance.csv", index = True)
+        feature_importance_df_mean.to_csv("../result/feature_importance.csv", index = True)
         useless_features_list = useless_features_df.index.tolist()
         logger.info('Useless features: \'' + '\', \''.join(useless_features_list) + '\'')
 
@@ -222,7 +299,7 @@ if __name__ == '__main__':
     parser.add_argument('--test_file', default='../../dataset/test.csv', type=str)
     parser.add_argument('--result_path', default='../result/submission.csv', type=str)
     # lgbm parameters(needed to be filled in with best parameters eventually)
-    parser.add_argument('--NUM_FOLDS', default=5, type=int, help='number of folds we split for k-fold validation')
+    parser.add_argument('--NUM_FOLDS', default=5, type=int, help='number of folds we split for out-of-fold validation')
     parser.add_argument('--SEED', default=1030, type=int, help='set seed for reproducibility')
     parser.add_argument('--NUM_LEAVES', default=31, type=int, help='Maximum tree leaves for base learners.')
     parser.add_argument('--CPU_USE_RATE', default=1.0, type=float, help='0~1 use how many percentanges of cpu')
