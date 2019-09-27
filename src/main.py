@@ -13,32 +13,11 @@ import numpy as np
 from contextlib import contextmanager
 import time
 import gc 
-from util import s_to_time_format, string_to_datetime,hour_to_range
+from util import s_to_time_format, string_to_datetime, hour_to_range
 from time import strftime, localtime
 import logging
 import sys
-
-CATEGORY = ['ecfg', 'flbmk', 'flg_3dsmk', 'insfg', 'ovrlt', 'scity', 'csmcu', 'cano', 'mchno', 'hcefg', 'bacno', 'contp', 'etymd', 'acqic']
-
-AGG_RECIPE = [
-    (["cano"], [
-            ('conam', 'min'),
-            ('conam', 'max'),
-            ('conam', 'mean'),
-            ('conam', 'median'),
-            ('conam', 'var'),
-            ('conam', 'sum'),
-        ]),
-
-    (["bacno","cano"], [
-        ('conam', 'min'),
-        ('conam', 'max'),
-        ('conam', 'mean'),
-        ('conam', 'median'),
-        ('conam', 'var'),
-        ('conam', 'sum'),
-    ]),
-]
+from config import Configs
 
 # logging
 logger = logging.getLogger()
@@ -142,7 +121,7 @@ def kfold_lightgbm(df_train, df_test, num_folds, args, stratified = False, seed 
                 train_y, 
                 eval_set=[(train_x, train_y), (valid_x, valid_y)], 
                 eval_metric= lgb_f1_score, 
-                verbose= True, 
+                verbose= False, 
                 early_stopping_rounds= 100, 
                 categorical_feature='auto') # early_stopping_rounds= 200
         # probabilty belong to class1(fraud)
@@ -168,19 +147,6 @@ def kfold_lightgbm(df_train, df_test, num_folds, args, stratified = False, seed 
     df_test[['txkey', 'fraud_ind']].to_csv(args.result_path, index= False)
     
     return feature_importance_df, over_folds_val_score
-
-# Display/plot feature importance
-def display_importances(feature_importance_df_):
-    import matplotlib.pyplot as plt
-    import seaborn as sns
-    
-    cols = feature_importance_df_[["feature", "importance"]].groupby("feature").mean().sort_values(by="importance", ascending=False)[:40].index
-    best_features = feature_importance_df_.loc[feature_importance_df_.feature.isin(cols)]
-    plt.figure(figsize=(8, 10))
-    sns.barplot(x="importance", y="feature", data=best_features.sort_values(by="importance", ascending=False))
-    plt.title('LightGBM Features (avg over folds)')
-    plt.tight_layout
-    plt.savefig('../result/lgbm_importances.png')
     
 def main(args):
     with timer("Process train/test application"):
@@ -194,7 +160,7 @@ def main(args):
         # pre-processing
         #-------------------------
 
-        for cat in CATEGORY:
+        for cat in Configs.CATEGORY:
             df_train[cat] = df_train[cat].astype('category')#.cat.codes
             df_test[cat] = df_test[cat].astype('category')
             
@@ -204,10 +170,10 @@ def main(args):
             df["loctm_"] = df.loctm.astype(int).astype(str)
             df.loctm_ = df.loctm_.apply(s_to_time_format).apply(string_to_datetime)
             # # time-related feature
-            # df["loctm_hour_of_day"] = df.loctm_.apply(lambda x: x.hour).astype('category')
-            # df["loctm_minute_of_hour"] = df.loctm_.apply(lambda x: x.minute)
-            # df["loctm_second_of_min"] = df.loctm_.apply(lambda x: x.second)
-            #df["loctm_absolute_time"] = [h*60+m for h,m in zip(df.loctm_hour_of_day,df.loctm_minute_of_hour)]
+            df["loctm_hour_of_day"] = df.loctm_.apply(lambda x: x.hour).astype('category')
+            df["loctm_minute_of_hour"] = df.loctm_.apply(lambda x: x.minute)
+            df["loctm_second_of_min"] = df.loctm_.apply(lambda x: x.second)
+            # df["loctm_absolute_time"] = [h*60+m for h,m in zip(df.loctm_hour_of_day,df.loctm_minute_of_hour)]
             df["hour_range"] = df.loctm_.apply(lambda x: hour_to_range(x.hour)).astype("category")
             # removed the columns no need
             df.drop(columns = ["loctm_"], axis = 1, inplace = True)
@@ -215,7 +181,25 @@ def main(args):
         logger.info("Test application df shape: {}".format(df_test.shape))
 
     with timer("Add bacno/cano feature"):
-        df_train, df_test = group_target_by_cols(df_train, df_test, AGG_RECIPE)
+        df_train, df_test = group_target_by_cols(df_train, df_test, Configs.CONAM_AGG_RECIPE_1)
+
+        logger.info("Train application df shape: {}".format(df_train.shape))
+        logger.info("Test application df shape: {}".format(df_test.shape))
+
+    with timer("Add iterm-related feature"):
+        df_train, df_test = group_target_by_cols(df_train, df_test, Configs.ITERM_AGG_RECIPE)
+
+        logger.info("Train application df shape: {}".format(df_train.shape))
+        logger.info("Test application df shape: {}".format(df_test.shape))
+
+    with timer("Add conam-related feature"):
+        df_train, df_test = group_target_by_cols(df_train, df_test, Configs.CONAM_AGG_RECIPE_2)
+
+        logger.info("Train application df shape: {}".format(df_train.shape))
+        logger.info("Test application df shape: {}".format(df_test.shape))
+
+    with timer("Add hour-related feature"):
+        df_train, df_test = group_target_by_cols(df_train, df_test, Configs.HOUR_AGG_RECIPE)
 
         logger.info("Train application df shape: {}".format(df_train.shape))
         logger.info("Test application df shape: {}".format(df_test.shape))
@@ -231,8 +215,6 @@ def main(args):
 
     #     df_train = add_auto_encoder_feature(df_train,X_train, autoencoder, add_reconstructed_vec = True)
     #     df_test = add_auto_encoder_feature(df_test,X_test, autoencoder, add_reconstructed_vec = True)
-    #     for df in [df_train, df_test]:
-    #         df.drop(columns = ["loctm_hour_of_day","loctm_minute_of_hour", "loctm_second_of_min"], axis = 1, inplace = True)
 
     #     del df_train_, df_test_, X_train, X_test 
     #     gc.collect()
@@ -244,15 +226,18 @@ def main(args):
         if args.feature_selection:
             for df in [df_train, df_test]:
                 # drop random features (by null hypothesis)
-                df.drop(FEATURE_GRAVEYARD, axis=1, inplace=True, errors='ignore')
+                df.drop(Configs.FEATURE_GRAVEYARD, axis=1, inplace=True, errors='ignore')
 
-                # drop unused featuresfeatures_with_no_imp_at_least_twice
-                # df.drop(, axis=1, inplace=True, errors='ignore')
+                # drop unused features features_with_no_imp_at_least_twice
+                df.drop(Configs.FEATURE_USELESSNESS, axis=1, inplace=True, errors='ignore')
 
                 gc.collect()   
             logger.info("Train application df shape: {}".format(df_train.shape))
             logger.info("Test application df shape: {}".format(df_test.shape))
-        
+
+        for df in [df_train, df_test]:
+            df.drop(columns = ["loctm_hour_of_day","loctm_minute_of_hour", "loctm_second_of_min"], axis = 1, inplace = True)
+   
         
         ITERATION = (80 if args.TEST_NULL_HYPO else 1)
         feature_importance_df = pd.DataFrame()
@@ -267,6 +252,7 @@ def main(args):
         logger.info('Standard deviation %.6f\n============================================' %over_iterations_val_auc.std())
     
     if args.feature_importance_plot == True:
+        from util import display_importances
         display_importances(feature_importance_df)
         
     feature_importance_df_median = feature_importance_df[["feature", "importance"]].groupby("feature").median().sort_values(by="importance", ascending=False)
