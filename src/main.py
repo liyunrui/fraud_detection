@@ -4,16 +4,14 @@ python3 main.py ../../dataset/train.csv ../../dataset/test.csv ../result/cv_resu
 make train
 
 """
+import time
 import argparse
 import pandas as pd
 from sklearn.model_selection import train_test_split, GridSearchCV
-import lightgbm as lgb
-from sklearn.metrics import f1_score
 import numpy as np
 from contextlib import contextmanager
-import time
 import gc 
-from util import s_to_time_format, string_to_datetime, hour_to_range
+from util import s_to_time_format, string_to_datetime, hour_to_range, kfold_lightgbm, kfold_xgb
 from time import strftime, localtime
 import logging
 import sys
@@ -23,6 +21,9 @@ from config import Configs
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 logger.addHandler(logging.StreamHandler(sys.stdout))
+#log_file = '{}-{}-{}.log'.format(opt.model_name, opt.dataset, strftime("%y%m%d-%H%M", localtime()))
+log_file = '../result/{}.log'.format(strftime("%y%m%d-%H%M", localtime()))
+logger.addHandler(logging.FileHandler(log_file))
 
 def group_target_by_cols(df_train, df_test, recipe):
     df = pd.concat([df_train, df_test], axis = 0)
@@ -57,96 +58,6 @@ def add_auto_encoder_feature(df_raw, df, autoencoder, add_reconstructed_vec = Tr
 
     return out
 
-def lgb_f1_score(y_true, y_pred):
-    y_hat = np.round(y_pred)
-    return 'f1', f1_score(y_true, y_hat), True
-
-def kfold_lightgbm(df_train, df_test, num_folds, args, stratified = False, seed = int(time.time())):
-    """
-    LightGBM GBDT with KFold or Stratified KFold
-    """
-    from sklearn.model_selection import KFold, StratifiedKFold
-    import multiprocessing   
-    # Cross validation model
-    if stratified:
-        folds = StratifiedKFold(n_splits= num_folds, shuffle=True, random_state=seed)
-    else:
-        folds = KFold(n_splits= num_folds, shuffle=True, random_state=seed)
-    # Create arrays and dataframes to store results
-    oof_preds = np.zeros(df_train.shape[0])
-    #train_preds = np.zeros(df_train.shape[0])
-    sub_preds = np.zeros(df_test.shape[0])
-    feature_importance_df = pd.DataFrame()
-    feats = [f for f in df_train.columns if f not in ["fraud_ind"]]
-    # k-fold
-    if args.TEST_NULL_HYPO:
-        # shuffling our label for feature selection
-        df_train['fraud_ind'] = df_train['fraud_ind'].copy().sample(frac=1.0).values
-    for n_fold, (train_idx, valid_idx) in enumerate(folds.split(df_train[feats], df_train['fraud_ind'])):
-        train_x, train_y = df_train[feats].iloc[train_idx], df_train['fraud_ind'].iloc[train_idx]
-        valid_x, valid_y = df_train[feats].iloc[valid_idx], df_train['fraud_ind'].iloc[valid_idx]
-        # LightGBM parameters found by Bayesian optimization
-        if args.TEST_NULL_HYPO:
-            clf = lgb.LGBMClassifier(
-                nthread=int(multiprocessing.cpu_count()*args.CPU_USE_RATE),
-                n_estimators=10000,
-                learning_rate=0.02,
-                num_leaves=127,
-                max_depth=args.MAX_DEPTH,
-                silent=-1,
-                verbose=-1,
-                random_state=args.seed,
-                )
-        else:
-            clf = lgb.LGBMClassifier(
-                n_jobs = -1,
-                n_estimators=10000,
-                learning_rate=0.02, # 0.02
-                num_leaves=args.NUM_LEAVES,
-                colsample_bytree=args.COLSAMPLE_BYTREE,
-                subsample=args.SUBSAMPLE,
-                subsample_freq=args.SUBSAMPLE_FREQ,
-                max_depth=args.MAX_DEPTH,
-                reg_alpha=args.REG_ALPHA,
-                reg_lambda=args.REG_LAMBDA,
-                min_split_gain=args.MIN_SPLIT_GAIN,
-                min_child_weight=args.MIN_CHILD_WEIGHT,
-                max_bin=args.MAX_BIN,
-                silent=-1,
-                verbose=-1,
-                random_state=seed,
-                scale_pos_weight=args.SCALE_POS_WEIGHT
-                )
-        clf.fit(train_x, 
-                train_y, 
-                eval_set=[(train_x, train_y), (valid_x, valid_y)], 
-                eval_metric= lgb_f1_score, 
-                verbose= False, 
-                early_stopping_rounds= 100, 
-                categorical_feature='auto') # early_stopping_rounds= 200
-        # probabilty belong to class1(fraud)
-        oof_preds[valid_idx] = clf.predict_proba(valid_x, num_iteration=clf.best_iteration_)[:, 1]
-        #train_preds[train_idx] += clf.predict_proba(train_x, num_iteration=clf.best_iteration_)[:, 1] / folds.n_splits
-        sub_preds += clf.predict_proba(df_test[feats], num_iteration=clf.best_iteration_)[:, 1] / folds.n_splits
-
-        fold_importance_df = pd.DataFrame()
-        fold_importance_df["feature"] = feats
-        fold_importance_df["importance"] = clf.feature_importances_
-        fold_importance_df["fold"] = n_fold + 1
-        feature_importance_df = pd.concat([feature_importance_df, fold_importance_df], axis=0)
-        logger.info('Fold %2d val f1-score : %.6f' % (n_fold + 1, lgb_f1_score(valid_y, oof_preds[valid_idx])[1]))
-        del clf, train_x, train_y, valid_x, valid_y
-        gc.collect()
-        
-    #print('---------------------------------------\nOver-folds train f1-score %.6f' % lgb_f1_score(df_train['fraud_ind'], train_preds)[1])
-    logger.info('---------------------------------------\n')
-    over_folds_val_score = lgb_f1_score(df_train['fraud_ind'], oof_preds)[1]
-    logger.info('Over-folds val f1-score %.6f\n---------------------------------------' % over_folds_val_score)
-    # Write submission file and plot feature importance
-    df_test.loc[:,'fraud_ind'] = np.round(sub_preds)
-    df_test[['txkey', 'fraud_ind']].to_csv(args.result_path, index= False)
-    
-    return feature_importance_df, over_folds_val_score
     
 def main(args):
     with timer("Process train/test application"):
@@ -161,10 +72,9 @@ def main(args):
         #-------------------------
 
         for cat in Configs.CATEGORY:
-            df_train[cat] = df_train[cat].astype('category')#.cat.codes
+            df_train[cat] = df_train[cat].astype('category') #.cat.codes
             df_test[cat] = df_test[cat].astype('category')
             
-        
         for df in [df_train, df_test]:
             # pre-processing
             df["loctm_"] = df.loctm.astype(int).astype(str)
@@ -200,6 +110,35 @@ def main(args):
 
     with timer("Add hour-related feature"):
         df_train, df_test = group_target_by_cols(df_train, df_test, Configs.HOUR_AGG_RECIPE)
+
+        logger.info("Train application df shape: {}".format(df_train.shape))
+        logger.info("Test application df shape: {}".format(df_test.shape))
+
+    with timer("Add cano/conam feature"):
+        df_train, df_test = group_target_by_cols(df_train, df_test, Configs.CANO_CONAM_COUNT_RECIPE)
+
+        logger.info("Train application df shape: {}".format(df_train.shape))
+        logger.info("Test application df shape: {}".format(df_test.shape))
+
+    with timer("Add cano/bacno latent feature"):
+        df = pd.read_csv("../features/bacno_latent_features.csv")
+        df_train = df_train.merge(df, on = "bacno", how = "left")
+        df_test = df_test.merge(df, on = "bacno", how = "left")
+        df = pd.read_csv("../features/cano_latent_features.csv")
+        df_train = df_train.merge(df, on = "cano", how = "left")
+        df_test = df_test.merge(df, on = "cano", how = "left")
+
+        logger.info("Train application df shape: {}".format(df_train.shape))
+        logger.info("Test application df shape: {}".format(df_test.shape))
+
+    with timer("Add locdt-related feature"):
+        df_train, df_test = group_target_by_cols(df_train, df_test, Configs.LOCDT_CONAM_RECIPE)
+
+        logger.info("Train application df shape: {}".format(df_train.shape))
+        logger.info("Test application df shape: {}".format(df_test.shape))
+
+    with timer("Add mchno-related feature"):
+        df_train, df_test = group_target_by_cols(df_train, df_test, Configs.MCHNO_CONAM_RECIPE)
 
         logger.info("Train application df shape: {}".format(df_train.shape))
         logger.info("Test application df shape: {}".format(df_test.shape))
@@ -243,8 +182,13 @@ def main(args):
         feature_importance_df = pd.DataFrame()
         over_iterations_val_auc = np.zeros(ITERATION)
         for i in range(ITERATION):
-            logger.info('Iteration %i' %i)    
-            iter_feat_imp, over_folds_val_auc = kfold_lightgbm(df_train, df_test, num_folds = args.NUM_FOLDS, args = args, stratified = args.STRATIFIED, seed = args.SEED)
+            logger.info('Iteration %i' %i)
+            if args.model == "lgb":    
+                iter_feat_imp, over_folds_val_auc = kfold_lightgbm(df_train, df_test, num_folds = args.NUM_FOLDS, args = args, stratified = args.STRATIFIED, seed = args.SEED, logger = logger)
+            elif args.model == "xgb":
+                iter_feat_imp, over_folds_val_auc = kfold_xgb(df_train, df_test, num_folds = args.NUM_FOLDS, args = args, stratified = args.STRATIFIED, seed = args.SEED, logger = logger)
+            else:
+                print("Now we only support LightGBM or Xgboost model!")           
             feature_importance_df = pd.concat([feature_importance_df, iter_feat_imp], axis=0)
             over_iterations_val_auc[i] = over_folds_val_auc
 
@@ -253,7 +197,7 @@ def main(args):
     
     if args.feature_importance_plot == True:
         from util import display_importances
-        display_importances(feature_importance_df)
+        display_importances(feature_importance_df, args.model)
         
     feature_importance_df_median = feature_importance_df[["feature", "importance"]].groupby("feature").median().sort_values(by="importance", ascending=False)
     useless_features_df = feature_importance_df_median.loc[feature_importance_df_median['importance'] == 0]
@@ -266,11 +210,6 @@ def main(args):
         useless_features_list = useless_features_df.index.tolist()
         logger.info('Useless features: \'' + '\', \''.join(useless_features_list) + '\'')
 
-    # save log file
-    #log_file = '{}-{}-{}.log'.format(opt.model_name, opt.dataset, strftime("%y%m%d-%H%M", localtime()))
-    log_file = '../result/{}.log'.format(strftime("%y%m%d-%H%M", localtime()))
-
-    logger.addHandler(logging.FileHandler(log_file))
 
 @contextmanager
 def timer(title):
@@ -304,5 +243,7 @@ if __name__ == '__main__':
     parser.add_argument('--feature_selection', default=False, type=bool, help='drop unused features and random features (by null hypothesis). If true, need to provide features set in list format')
     parser.add_argument('--STRATIFIED', default=True, type=bool, help='use STRATIFIED k-fold. Otherwise, use k-fold')
     parser.add_argument('--TEST_NULL_HYPO', default=False, type=bool, help='get random features by null hypothesis')
+    parser.add_argument('--ensemble', default=True, type=bool, help='save testing results with predicted prob for ensemble')
+    parser.add_argument('--model', default='lgb', type=str, help='lgb or xgb')
 
     main(parser.parse_args())

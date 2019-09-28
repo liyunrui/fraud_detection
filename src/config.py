@@ -1,6 +1,5 @@
 import os
 
-
 class Configs:
     # categorial columns in data
     CATEGORY = ['ecfg', 'flbmk', 'flg_3dsmk', 'insfg', 'ovrlt', 'scity', 'csmcu', 'cano', 'mchno', 'hcefg', 'bacno', 'contp', 'etymd', 'acqic']
@@ -224,6 +223,70 @@ class Configs:
                 ('conam', 'var'),
                 ('conam', 'sum'),
             ]),
+    ]
+    CANO_CONAM_COUNT_RECIPE = [
+        (["cano","conam"], [
+                ('bacno', 'count'),
+            ]),
+    ]
+
+    LOCDT_CONAM_RECIPE = [
+        (["bacno","locdt"], [
+                ('conam', 'count'),
+                ('conam', 'min'),
+                ('conam', 'max'),
+                ('conam', 'mean'),
+                ('conam', 'median'),
+                ('conam', 'var'),
+                ('conam', 'sum'),
+            ]), # 這個歸戶(這個人)在同一天當中刷卡的次數, 刷卡的最大金額, 最小金額, .., 總金額
+        (["bacno","locdt","scity"], [
+                ('conam', 'count'),
+                ('conam', 'min'),
+                ('conam', 'max'),
+                ('conam', 'mean'),
+                ('conam', 'median'),
+                ('conam', 'var'),
+                ('conam', 'sum'),
+            ]),
+        (["bacno","locdt","stocn"], [
+                ('conam', 'count'),
+                ('conam', 'min'),
+                ('conam', 'max'),
+                ('conam', 'mean'),
+                ('conam', 'median'),
+                ('conam', 'var'),
+                ('conam', 'sum'),
+            ]),
+        (["bacno","locdt","mchno"], [
+                ('conam', 'count'),
+                ('conam', 'min'),
+                ('conam', 'max'),
+                ('conam', 'mean'),
+                ('conam', 'median'),
+                ('conam', 'var'),
+                ('conam', 'sum'),
+            ]),
+        (["bacno","locdt","stocn","scity"], [
+                ('conam', 'count'),
+                ('conam', 'min'),
+                ('conam', 'max'),
+                ('conam', 'mean'),
+                ('conam', 'median'),
+                ('conam', 'var'),
+                ('conam', 'sum'),
+            ]),
+    ]
+    MCHNO_CONAM_RECIPE = [
+        (["bacno","mchno"], [
+            ('conam', 'count'),
+            ('conam', 'min'),
+            ('conam', 'max'),
+            ('conam', 'mean'),
+            ('conam', 'median'),
+            ('conam', 'var'),
+            ('conam', 'sum'),
+        ]),# 這個歸戶(這個人)在同一店家刷卡的次數, 刷卡的最大金額, 最小金額, .., 總金額
     ]
     # feature selection
     FEATURE_GRAVEYARD = [] # list of feature names
