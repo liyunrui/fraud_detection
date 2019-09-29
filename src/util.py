@@ -6,6 +6,8 @@ import gc
 
 def string_padding(s):
     """
+    Test case:
+
     s = "819"
     after padding
     s = "000819"
@@ -92,6 +94,22 @@ def display_importances(feature_importance_df_, model):
         plt.savefig('../result/xgb_importances.png')
     else:
         print("Now we only support LightGBM or Xgboost model!")  
+
+def add_auto_encoder_feature(df_raw, df, autoencoder, add_reconstructed_vec = True):
+
+    predictions = autoencoder.predict(df) # get reconstructed vector, 2-D, [num_samples, num_features]
+    mse = np.mean(np.power(df - predictions, 2), axis=1) # get reconstructed error, 1-D, [num_samples,]
+
+    if add_reconstructed_vec == True:
+        df = pd.DataFrame(predictions, columns=["reconstructed_dim_{}".format(i) for i in range(predictions.shape[1])])
+        df["reconstruction_error"] = mse
+    else:
+        df = pd.DataFrame({"reconstruction_error": mse})
+    out = pd.concat([df_raw.reset_index(drop = True), df.reset_index(drop = True)], axis = 1)
+
+    assert len(out)==len(df_raw)==len(df), "it should be same"
+
+    return out
 
 def lgb_f1_score(y_true, y_pred):
     """evaluation metric"""
@@ -192,6 +210,13 @@ def kfold_lightgbm(df_train, df_test, num_folds, args, logger, stratified = Fals
     
     return feature_importance_df, over_folds_val_score
 
+def xgb_f1_score(y_pred, y_true):
+    """evaluation metric"""
+    y_hat = np.round(y_pred)
+    y_true = y_true.get_label()
+    #print ('f1-score', f1_score(y_true, y_hat))
+    return 'f1-score-error', 1-f1_score(y_true, y_hat) # error
+
 # xgb model
 def kfold_xgb(df_train, df_test, num_folds, args, logger, stratified = False, seed = int(time.time())):
     """
@@ -254,7 +279,7 @@ def kfold_xgb(df_train, df_test, num_folds, args, logger, stratified = False, se
         clf.fit(train_x, 
                 train_y, 
                 eval_set=[(train_x, train_y), (valid_x, valid_y)], 
-                eval_metric= lgb_f1_score, 
+                eval_metric= xgb_f1_score, 
                 verbose= False, 
                 early_stopping_rounds= 100, 
                 #categorical_feature='auto'

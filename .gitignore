@@ -13,6 +13,7 @@ result/
 data/
 data/test.zip
 data/train.zip
-
+features/
+models/
 ### Starts with ._
 ._*

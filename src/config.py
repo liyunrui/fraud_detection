@@ -288,21 +288,39 @@ class Configs:
             ('conam', 'sum'),
         ]),# 這個歸戶(這個人)在同一店家刷卡的次數, 刷卡的最大金額, 最小金額, .., 總金額
     ]
+    SCITY_CONAM_RECIPE = [
+        (["bacno","scity"], [
+            ('conam', 'count'),
+            ('conam', 'min'),
+            ('conam', 'max'),
+            ('conam', 'mean'),
+            ('conam', 'median'),
+            ('conam', 'var'),
+            ('conam', 'sum'),
+        ]), # 這個歸戶(這個人)在同ㄧ城市刷卡的次數, 刷卡的最大金額, 最小金額, .., 總金額
+    ]
+    STOCN_CONAM_RECIPE = [
+        (["bacno","stocn"], [
+            ('conam', 'count'),
+            ('conam', 'min'),
+            ('conam', 'max'),
+            ('conam', 'mean'),
+            ('conam', 'median'),
+            ('conam', 'var'),
+            ('conam', 'sum'),
+        ]), # 這個歸戶(這個人)在同ㄧ國家刷卡的次數, 刷卡的最大金額, 最小金額, .., 總金額
+    ]
+
     # feature selection
     FEATURE_GRAVEYARD = [] # list of feature names
-    FEATURE_USELESSNESS = ['sum_iterm_BY_csmcu', 'var_iterm_BY_bacno_cano', 'sum_iterm_BY_stocn', 
-    'sum_iterm_BY_stscd', 'var_conam_BY_bacno_cano', 'var_iterm_BY_contp', 'median_iterm_BY_csmcu', 
-    'sum_iterm_BY_bacno_cano', 'median_iterm_BY_stocn', 'max_conam_BY_bacno_cano', 'max_conam_BY_stscd', 
-    'max_iterm_BY_bacno_cano', 'mean_conam_BY_bacno_cano', 'mean_iterm_BY_bacno_cano', 'mean_iterm_BY_stocn', 
-    'median_conam_BY_bacno_cano', 'median_iterm_BY_acqic', 'median_iterm_BY_bacno_cano', 
-    'median_iterm_BY_contp', 'median_iterm_BY_loctm_hour_of_day', 'median_iterm_BY_mcc', 
-    'median_iterm_BY_mchno', 'median_iterm_BY_scity', 'median_iterm_BY_stscd', 
-    'sum_iterm_BY_acqic', 'min_conam_BY_bacno_cano', 'min_conam_BY_loctm_hour_of_day', 
-    'min_conam_BY_stscd', 'min_iterm_BY_acqic', 'min_iterm_BY_bacno_cano', 'min_iterm_BY_contp', 
-    'min_iterm_BY_csmcu', 'min_iterm_BY_loctm_hour_of_day', 'min_iterm_BY_mcc', 
-    'min_iterm_BY_scity', 'min_iterm_BY_stocn', 'min_iterm_BY_stscd', 
-    'sum_conam_BY_bacno_cano', 'sum_conam_BY_stscd', 'var_iterm_BY_stscd']
-
-
-
-
+    FEATURE_USELESSNESS = ['var_iterm_BY_contp', 'median_iterm_BY_stscd', 'median_iterm_BY_stocn', 'median_iterm_BY_scity', 
+    'max_conam_BY_bacno_cano', 'var_iterm_BY_bacno_cano', 'median_iterm_BY_acqic', 'median_iterm_BY_mchno', 
+    'median_iterm_BY_mcc', 'median_iterm_BY_csmcu', 'median_iterm_BY_bacno_cano', 'median_iterm_BY_contp',
+    'median_iterm_BY_loctm_hour_of_day', 'min_iterm_BY_mcc', 'max_conam_BY_stscd', 'var_conam_BY_bacno_cano', 
+    'min_iterm_BY_scity', 'min_iterm_BY_stocn', 'min_iterm_BY_stscd', 'min_iterm_BY_loctm_hour_of_day', 
+    'min_iterm_BY_csmcu', 'min_iterm_BY_contp', 'sum_conam_BY_bacno_cano', 'mean_iterm_BY_bacno_cano', 
+    'min_iterm_BY_bacno_cano', 'min_iterm_BY_acqic', 'min_conam_BY_stscd', 'mean_conam_BY_bacno_cano', 
+    'mean_iterm_BY_stocn', 'min_conam_BY_loctm_hour_of_day', 'sum_conam_BY_stscd', 'sum_iterm_BY_acqic', 
+    'min_conam_BY_csmcu', 'sum_iterm_BY_bacno_cano', 'median_conam_BY_bacno_cano', 'sum_iterm_BY_csmcu',
+    'min_iterm_BY_mchno', 'sum_iterm_BY_stocn', 'sum_iterm_BY_stscd', 'min_conam_BY_bacno_cano', 
+    'max_iterm_BY_bacno_cano', 'var_iterm_BY_stscd']

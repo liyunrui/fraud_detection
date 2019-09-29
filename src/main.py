@@ -12,6 +12,7 @@ import numpy as np
 from contextlib import contextmanager
 import gc 
 from util import s_to_time_format, string_to_datetime, hour_to_range, kfold_lightgbm, kfold_xgb
+#from util import add_auto_encoder_feature
 from time import strftime, localtime
 import logging
 import sys
@@ -42,22 +43,11 @@ def group_target_by_cols(df_train, df_test, recipe):
     
     return df_train, df_test
 
-def add_auto_encoder_feature(df_raw, df, autoencoder, add_reconstructed_vec = True):
-
-    predictions = autoencoder.predict(df) # get reconstructed vector, 2-D, [num_samples, num_features]
-    mse = np.mean(np.power(df - predictions, 2), axis=1) # get reconstructed error, 1-D, [num_samples,]
-
-    if add_reconstructed_vec == True:
-        df = pd.DataFrame(predictions, columns=["reconstructed_dim_{}".format(i) for i in range(predictions.shape[1])])
-        df["reconstruction_error"] = mse
-    else:
-        df = pd.DataFrame({"reconstruction_error": mse})
-    out = pd.concat([df_raw.reset_index(drop = True), df.reset_index(drop = True)], axis = 1)
-
-    assert len(out)==len(df_raw)==len(df), "it should be same"
-
-    return out
-
+@contextmanager
+def timer(title):
+    t0 = time.time()
+    yield
+    logger.info("{} - done in {:.0f}s".format(title, time.time() - t0))
     
 def main(args):
     with timer("Process train/test application"):
@@ -143,6 +133,29 @@ def main(args):
         logger.info("Train application df shape: {}".format(df_train.shape))
         logger.info("Test application df shape: {}".format(df_test.shape))
 
+    with timer("Add scity-related feature"):
+        df_train, df_test = group_target_by_cols(df_train, df_test, Configs.SCITY_CONAM_RECIPE)
+
+        logger.info("Train application df shape: {}".format(df_train.shape))
+        logger.info("Test application df shape: {}".format(df_test.shape))
+
+    with timer("Add stocn-related feature"):
+        df_train, df_test = group_target_by_cols(df_train, df_test, Configs.STOCN_CONAM_RECIPE)
+
+        logger.info("Train application df shape: {}".format(df_train.shape))
+        logger.info("Test application df shape: {}".format(df_test.shape))
+
+    with timer("Add mchno/bacno latent feature"):
+        df = pd.read_csv("../features/bacno_latent_features_w_mchno.csv")
+        df_train = df_train.merge(df, on = "bacno", how = "left")
+        df_test = df_test.merge(df, on = "bacno", how = "left")
+        df = pd.read_csv("../features/mchno_latent_features.csv")
+        df_train = df_train.merge(df, on = "mchno", how = "left")
+        df_test = df_test.merge(df, on = "mchno", how = "left")
+
+        logger.info("Train application df shape: {}".format(df_train.shape))
+        logger.info("Test application df shape: {}".format(df_test.shape))
+
     # with timer("Add autoencoder feature"):
     #     from keras.models import load_model
     #     from autoencoder import value_to_count, feature_normalization_auto
@@ -163,6 +176,7 @@ def main(args):
 
     with timer("Run LightGBM with kfold"):
         if args.feature_selection:
+            logger.info("==============Feature Selection==============")
             for df in [df_train, df_test]:
                 # drop random features (by null hypothesis)
                 df.drop(Configs.FEATURE_GRAVEYARD, axis=1, inplace=True, errors='ignore')
@@ -209,13 +223,6 @@ def main(args):
         feature_importance_df_mean.to_csv("../result/feature_importance.csv", index = True)
         useless_features_list = useless_features_df.index.tolist()
         logger.info('Useless features: \'' + '\', \''.join(useless_features_list) + '\'')
-
-
-@contextmanager
-def timer(title):
-    t0 = time.time()
-    yield
-    logger.info("{} - done in {:.0f}s".format(title, time.time() - t0))
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
