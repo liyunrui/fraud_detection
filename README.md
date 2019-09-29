@@ -7,6 +7,9 @@
 make mf
 ```
 ```
+make mf-mchno
+```
+```
 make train-lgb
 ```
 ### Reuslt
