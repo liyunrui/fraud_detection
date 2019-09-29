@@ -16,6 +16,7 @@ from time import strftime, localtime
 import logging
 import sys
 from config import Configs
+from extraction import merge_and_split_dfs, get_conam_dict_by_day, last_x_day_conam
 
 # logging
 logger = logging.getLogger()
@@ -142,6 +143,18 @@ def main(args):
 
         logger.info("Train application df shape: {}".format(df_train.shape))
         logger.info("Test application df shape: {}".format(df_test.shape))
+
+    with timer('Add time-aggregate features'):
+
+        df, split_df = merge_and_split_dfs(df_train, df_test)
+        conam_dict = get_conam_dict_by_day(df)
+
+        df['last_3_day_mean_conam_per_day'] = last_x_day_conam(3, df, conam_dict)
+        df['last_7_day_mean_conam_per_day'] = last_x_day_conam(7, df, conam_dict)
+        df['last_10_day_mean_conam_per_day'] = last_x_day_conam(10, df, conam_dict)
+        df['last_30_day_mean_conam_per_day'] = last_x_day_conam(30, df, conam_dict)
+
+        df_train, df_test = split_df(df)
 
     # with timer("Add autoencoder feature"):
     #     from keras.models import load_model
