@@ -57,9 +57,9 @@ def feature_normalization_auto(df_train, df_test, mode = "train"):
     scaler.fit(data)
     
     if mode == 'train':
-        X_train = df_train[df_train.fraud_ind == 0]
+        #X_train = df_train[df_train.fraud_ind == 0]
         
-        X_train = X_train[feats]
+        X_train = df_train[feats]
         X_test = df_test[feats]
         
         X_train = scaler.transform(X_train)
@@ -103,7 +103,7 @@ def build_model(autoencoder,X_train,X_test,nb_epoch = 100,batch_size = 32):
                         loss='mean_squared_error',
                         metrics=['accuracy'])
 
-    checkpointer = ModelCheckpoint(filepath="../models/model.h5",
+    checkpointer = ModelCheckpoint(filepath="../models/autoencoder_v1.h5",
                                    monitor='val_loss',
                                    verbose=0,
                                    save_best_only=True)

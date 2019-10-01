@@ -12,6 +12,8 @@ import numpy as np
 from contextlib import contextmanager
 import gc 
 from util import s_to_time_format, string_to_datetime, hour_to_range, kfold_lightgbm, kfold_xgb
+from util import _time_elapsed_between_last_transactions,time_elapsed_between_last_transactions
+
 #from util import add_auto_encoder_feature
 from time import strftime, localtime
 import logging
@@ -156,6 +158,73 @@ def main(args):
         logger.info("Train application df shape: {}".format(df_train.shape))
         logger.info("Test application df shape: {}".format(df_test.shape))
 
+    with timer("Add elapsed time feature"):
+        df = pd.concat([df_train, df_test], axis = 0)
+        df.sort_values(by = ["bacno","locdt"], inplace = True)
+        
+        df["time_elapsed_between_last_transactions"] = df[["bacno","locdt"]] \
+        .groupby("bacno").apply(_time_elapsed_between_last_transactions).values
+        
+        df_train = df[~df.fraud_ind.isnull()]
+        df_test = df[df.fraud_ind.isnull()]
+        
+        df_test.drop(columns = ["fraud_ind"], axis = 1, inplace = True)
+        del df
+        gc.collect()
+
+        df_train["time_elapsed_between_last_transactions"] = df_train[["bacno","locdt","time_elapsed_between_last_transactions"]] \
+        .groupby(["bacno","locdt"]).apply(time_elapsed_between_last_transactions).values
+        
+        df_test["time_elapsed_between_last_transactions"] = df_test[["bacno","locdt","time_elapsed_between_last_transactions"]] \
+        .groupby(["bacno","locdt"]).apply(time_elapsed_between_last_transactions).values
+        
+        logger.info("Train application df shape: {}".format(df_train.shape))
+        logger.info("Test application df shape: {}".format(df_test.shape))
+
+    with timer("Add elapsed time aggregate feature"):
+        df_train, df_test = group_target_by_cols(df_train, df_test, Configs.TIME_ELAPSED_AGG_RECIPE)
+
+        logger.info("Train application df shape: {}".format(df_train.shape))
+        logger.info("Test application df shape: {}".format(df_test.shape))  
+
+    # with timer("Add scity/bacno latent feature"):
+    #     df = pd.read_csv("../features/bacno_latent_features_w_scity.csv")
+    #     df_train = df_train.merge(df, on = "bacno", how = "left")
+    #     df_test = df_test.merge(df, on = "bacno", how = "left")
+    #     df = pd.read_csv("../features/scity_latent_features.csv")
+    #     df_train = df_train.merge(df, on = "scity", how = "left")
+    #     df_test = df_test.merge(df, on = "scity", how = "left")
+
+    #     logger.info("Train application df shape: {}".format(df_train.shape))
+    #     logger.info("Test application df shape: {}".format(df_test.shape))
+
+    # with timer("Add stocn/bacno latent feature"):
+    #     df = pd.read_csv("../features/bacno_latent_features_w_stocn.csv")
+    #     df_train = df_train.merge(df, on = "bacno", how = "left")
+    #     df_test = df_test.merge(df, on = "bacno", how = "left")
+    #     df = pd.read_csv("../features/stocn_latent_features.csv")
+    #     df_train = df_train.merge(df, on = "stocn", how = "left")
+    #     df_test = df_test.merge(df, on = "stocn", how = "left")
+
+    #     logger.info("Train application df shape: {}".format(df_train.shape))
+    #     logger.info("Test application df shape: {}".format(df_test.shape))
+
+    # with timer('Add time-aggregate features'):
+    #     from extraction import merge_and_split_dfs, get_conam_dict_by_day, last_x_day_conam
+
+    #     df, split_df = merge_and_split_dfs(df_train, df_test)
+    #     conam_dict = get_conam_dict_by_day(df)
+
+    #     df['last_3_day_mean_conam_per_day'] = last_x_day_conam(3, df, conam_dict)
+    #     df['last_7_day_mean_conam_per_day'] = last_x_day_conam(7, df, conam_dict)
+    #     df['last_10_day_mean_conam_per_day'] = last_x_day_conam(10, df, conam_dict)
+    #     df['last_30_day_mean_conam_per_day'] = last_x_day_conam(30, df, conam_dict)
+
+    #     df_train, df_test = split_df(df)
+        
+    #     logger.info("Train application df shape: {}".format(df_train.shape))
+    #     logger.info("Test application df shape: {}".format(df_test.shape))
+
     # with timer("Add autoencoder feature"):
     #     from keras.models import load_model
     #     from autoencoder import value_to_count, feature_normalization_auto
@@ -192,7 +261,7 @@ def main(args):
             df.drop(columns = ["loctm_hour_of_day","loctm_minute_of_hour", "loctm_second_of_min"], axis = 1, inplace = True)
    
         
-        ITERATION = (80 if args.TEST_NULL_HYPO else 1)
+        ITERATION = (5 if args.TEST_NULL_HYPO else 1)
         feature_importance_df = pd.DataFrame()
         over_iterations_val_auc = np.zeros(ITERATION)
         for i in range(ITERATION):

@@ -311,6 +311,77 @@ class Configs:
         ]), # 這個歸戶(這個人)在同ㄧ國家刷卡的次數, 刷卡的最大金額, 最小金額, .., 總金額
     ]
 
+    TIME_ELAPSED_AGG_RECIPE = [
+        (["conam"], [
+                ('time_elapsed_between_last_transactions', 'min'),
+                ('time_elapsed_between_last_transactions', 'max'),
+                ('time_elapsed_between_last_transactions', 'mean'),
+                ('time_elapsed_between_last_transactions', 'median'),
+                ('time_elapsed_between_last_transactions', 'var'),
+                ('time_elapsed_between_last_transactions', 'sum'),
+            ]), # 這個金額, 距離上一次消費的最小天數, 最大天數,...總天數
+        (["cano"], [
+                ('time_elapsed_between_last_transactions', 'min'),
+                ('time_elapsed_between_last_transactions', 'max'),
+                ('time_elapsed_between_last_transactions', 'mean'),
+                ('time_elapsed_between_last_transactions', 'median'),
+                ('time_elapsed_between_last_transactions', 'var'),
+                ('time_elapsed_between_last_transactions', 'sum'),
+            ]), # 這個卡號, 距離上一次消費的最小天數, 最大天數,...總天數
+        (["bacno"], [
+                ('time_elapsed_between_last_transactions', 'min'),
+                ('time_elapsed_between_last_transactions', 'max'),
+                ('time_elapsed_between_last_transactions', 'mean'),
+                ('time_elapsed_between_last_transactions', 'median'),
+                ('time_elapsed_between_last_transactions', 'var'),
+                ('time_elapsed_between_last_transactions', 'sum'),
+            ]), # 這個歸戶(這個人), 距離上一次消費的最小天數, 最大天數,...總天數
+        (["bacno","cano"], [
+            ('time_elapsed_between_last_transactions', 'min'),
+            ('time_elapsed_between_last_transactions', 'max'),
+            ('time_elapsed_between_last_transactions', 'mean'),
+            ('time_elapsed_between_last_transactions', 'median'),
+            ('time_elapsed_between_last_transactions', 'var'),
+            ('time_elapsed_between_last_transactions', 'sum'),
+        ]), # 這個歸戶(這個人)在這個卡號, 距離上一次消費的最小天數, 最大天數,...總天數
+        (["bacno","stocn"], [
+            ('time_elapsed_between_last_transactions', 'count'),
+            ('time_elapsed_between_last_transactions', 'min'),
+            ('time_elapsed_between_last_transactions', 'max'),
+            ('time_elapsed_between_last_transactions', 'mean'),
+            ('time_elapsed_between_last_transactions', 'median'),
+            ('time_elapsed_between_last_transactions', 'var'),
+            ('time_elapsed_between_last_transactions', 'sum'),
+        ]), # 這個歸戶(這個人)在同ㄧ國家距離上一次消費的最小天數, 最大天數,...總天數
+        (["bacno","scity"], [
+            ('time_elapsed_between_last_transactions', 'count'),
+            ('time_elapsed_between_last_transactions', 'min'),
+            ('time_elapsed_between_last_transactions', 'max'),
+            ('time_elapsed_between_last_transactions', 'mean'),
+            ('time_elapsed_between_last_transactions', 'median'),
+            ('time_elapsed_between_last_transactions', 'var'),
+            ('time_elapsed_between_last_transactions', 'sum'),
+        ]), # 這個歸戶(這個人)同ㄧ城市距離上一次消費的最小天數, 最大天數,...總天數
+        (["bacno","mchno"], [
+            ('time_elapsed_between_last_transactions', 'count'),
+            ('time_elapsed_between_last_transactions', 'min'),
+            ('time_elapsed_between_last_transactions', 'max'),
+            ('time_elapsed_between_last_transactions', 'mean'),
+            ('time_elapsed_between_last_transactions', 'median'),
+            ('time_elapsed_between_last_transactions', 'var'),
+            ('time_elapsed_between_last_transactions', 'sum'),
+        ]), # 這個歸戶(這個人)同一店家距離上一次消費的最小天數, 最大天數,...總天數
+        (["bacno","hour_range"], [
+            ('time_elapsed_between_last_transactions', 'count'),
+            ('time_elapsed_between_last_transactions', 'min'),
+            ('time_elapsed_between_last_transactions', 'max'),
+            ('time_elapsed_between_last_transactions', 'mean'),
+            ('time_elapsed_between_last_transactions', 'median'),
+            ('time_elapsed_between_last_transactions', 'var'),
+            ('time_elapsed_between_last_transactions', 'sum'),
+        ]), # 這個歸戶(這個人)同一時距(midnight, early_morning, ..,night)距離上一次消費的最小天數, 最大天數,...總天數
+    ]
+
     # feature selection
     FEATURE_GRAVEYARD = [] # list of feature names
     FEATURE_USELESSNESS = ['var_iterm_BY_contp', 'median_iterm_BY_stscd', 'median_iterm_BY_stocn', 'median_iterm_BY_scity', 
@@ -323,4 +394,16 @@ class Configs:
     'mean_iterm_BY_stocn', 'min_conam_BY_loctm_hour_of_day', 'sum_conam_BY_stscd', 'sum_iterm_BY_acqic', 
     'min_conam_BY_csmcu', 'sum_iterm_BY_bacno_cano', 'median_conam_BY_bacno_cano', 'sum_iterm_BY_csmcu',
     'min_iterm_BY_mchno', 'sum_iterm_BY_stocn', 'sum_iterm_BY_stscd', 'min_conam_BY_bacno_cano', 
-    'max_iterm_BY_bacno_cano', 'var_iterm_BY_stscd']
+    'max_iterm_BY_bacno_cano', 'var_iterm_BY_stscd',
+
+     'sum_time_elapsed_between_last_transactions_BY_bacno_cano', 'sum_iterm_BY_contp', 'max_iterm_BY_acqic',
+     'mean_iterm_BY_contp', 'mean_iterm_BY_csmcu', 'max_iterm_BY_contp', 
+     'mean_time_elapsed_between_last_transactions_BY_bacno_cano', 
+     'var_time_elapsed_between_last_transactions_BY_bacno_cano', 
+     'min_time_elapsed_between_last_transactions_BY_bacno_cano', 
+     'min_iterm_BY_cano', 'var_conam_BY_contp', 'max_time_elapsed_between_last_transactions_BY_bacno_cano', 
+     'median_time_elapsed_between_last_transactions_BY_bacno_cano', 
+     'max_iterm_BY_stocn'
+
+
+    ]

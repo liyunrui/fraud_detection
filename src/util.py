@@ -72,6 +72,17 @@ def hour_to_range(hr):
     else:
         return 'night'
 
+def time_elapsed_between_last_transactions(df):
+    if len(df) > 1:
+        df.time_elapsed_between_last_transactions = [df.time_elapsed_between_last_transactions.iloc[0] for i in range(len(df))]
+        return df.time_elapsed_between_last_transactions
+    else:
+        return df.time_elapsed_between_last_transactions
+
+def _time_elapsed_between_last_transactions(df):
+    #return df.locdt.diff(periods=1).fillna(0)
+    return df.locdt.diff(periods=1)
+
 # Display/plot feature importance
 def display_importances(feature_importance_df_, model):
     import matplotlib.pyplot as plt
@@ -79,7 +90,7 @@ def display_importances(feature_importance_df_, model):
     if model == "lgb":
         cols = feature_importance_df_[["feature", "importance"]].groupby("feature").mean().sort_values(by="importance", ascending=False)[:40].index
         best_features = feature_importance_df_.loc[feature_importance_df_.feature.isin(cols)]
-        plt.figure(figsize=(16, 10))
+        plt.figure(figsize=(32, 10))
         sns.barplot(x="importance", y="feature", data=best_features.sort_values(by="importance", ascending=False))
         plt.title('LightGBM Features (avg over folds)')
         plt.tight_layout
@@ -87,7 +98,7 @@ def display_importances(feature_importance_df_, model):
     elif model == "xgb":
         cols = feature_importance_df_[["feature", "importance"]].groupby("feature").mean().sort_values(by="importance", ascending=False)[:40].index
         best_features = feature_importance_df_.loc[feature_importance_df_.feature.isin(cols)]
-        plt.figure(figsize=(16, 10))
+        plt.figure(figsize=(32, 10))
         sns.barplot(x="importance", y="feature", data=best_features.sort_values(by="importance", ascending=False))
         plt.title('Xgboost Features (avg over folds)')
         plt.tight_layout

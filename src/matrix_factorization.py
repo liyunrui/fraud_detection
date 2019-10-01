@@ -1,4 +1,8 @@
 """
+the Matrix Fatorization-based features are created in a unsupervised way 
+and therefore lower the need of expert knowledge for the creation 
+of the fraud detection system.
+
 bacno-mchno matrix
 bacno-contp matrix
 bacno-scity matrix
