@@ -80,8 +80,8 @@ def time_elapsed_between_last_transactions(df):
         return df.time_elapsed_between_last_transactions
 
 def _time_elapsed_between_last_transactions(df):
-    #return df.locdt.diff(periods=1).fillna(0)
-    return df.locdt.diff(periods=1)
+    return df.locdt.diff(periods=1).fillna(-1)
+    #return df.locdt.diff(periods=1)
 
 # Display/plot feature importance
 def display_importances(feature_importance_df_, model):
