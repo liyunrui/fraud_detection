@@ -80,8 +80,23 @@ def time_elapsed_between_last_transactions(df):
         return df.time_elapsed_between_last_transactions
 
 def _time_elapsed_between_last_transactions(df):
-    return df.locdt.diff(periods=1).fillna(-1)
-    #return df.locdt.diff(periods=1)
+    #return df.locdt.diff(periods=1).fillna(0)
+    return df.locdt.diff(periods=1)
+
+def num_transaction_in_past_n_days(df, n):
+    """
+    Calculate how many transaction that this user have in the past n days
+    """
+    current_day_at_this_transaction = df.locdt.tolist()
+    output = []
+    for current_date in current_day_at_this_transaction:
+        history_date = current_date-n
+        c = 0
+        for i in current_day_at_this_transaction:
+            if (i >= history_date) & (i < current_date):
+                c+=1
+        output.append(c)
+    return pd.Series(output) # return Series instead of list
 
 # Display/plot feature importance
 def display_importances(feature_importance_df_, model):

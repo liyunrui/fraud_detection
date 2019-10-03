@@ -13,7 +13,7 @@ from contextlib import contextmanager
 import gc 
 from util import s_to_time_format, string_to_datetime, hour_to_range, kfold_lightgbm, kfold_xgb
 from util import _time_elapsed_between_last_transactions,time_elapsed_between_last_transactions
-
+from util import num_transaction_in_past_n_days
 #from util import add_auto_encoder_feature
 from time import strftime, localtime
 import logging
@@ -186,6 +186,30 @@ def main(args):
 
         logger.info("Train application df shape: {}".format(df_train.shape))
         logger.info("Test application df shape: {}".format(df_test.shape))  
+
+    # with timer("Add elapsed time related feature"):
+    #     df_train, df_test = group_target_by_cols(df_train, df_test, Configs.TIME_ELAPSED_AGG_RECIPE_2)
+
+    #     logger.info("Train application df shape: {}".format(df_train.shape))
+    #     logger.info("Test application df shape: {}".format(df_test.shape))  
+
+    with timer("Add historical-related feature"):
+        df = pd.concat([df_train, df_test], axis = 0)
+        df.sort_values(by = ["bacno","locdt"], inplace = True)
+        
+        for past_n_days in [2,3,4,5,6,7,14,30]:
+            df["num_transaction_in_past_{}_days".format(past_n_days)] = df[["bacno","locdt"]].groupby("bacno")\
+            .apply(lambda x: num_transaction_in_past_n_days(x,past_n_days)).values
+
+        df_train = df[~df.fraud_ind.isnull()]
+        df_test = df[df.fraud_ind.isnull()]
+        
+        df_test.drop(columns = ["fraud_ind"], axis = 1, inplace = True)
+        del df
+        gc.collect()
+       
+        print("Train application df shape: {}".format(df_train.shape))
+        print("Test application df shape: {}".format(df_test.shape))
 
     # with timer("Add scity/bacno latent feature"):
     #     df = pd.read_csv("../features/bacno_latent_features_w_scity.csv")

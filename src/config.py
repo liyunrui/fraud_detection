@@ -381,7 +381,45 @@ class Configs:
             ('time_elapsed_between_last_transactions', 'sum'),
         ]), # 這個歸戶(這個人)同一時距(midnight, early_morning, ..,night)距離上一次消費的最小天數, 最大天數,...總天數
     ]
+    TIME_ELAPSED_AGG_RECIPE_2 = [
+        (["bacno","time_elapsed_between_last_transactions"], [
+            ('conam', 'count'),
+            ('conam', 'min'),
+            ('conam', 'max'),
+            ('conam', 'mean'),
+            ('conam', 'median'),
+            ('conam', 'var'),
+            ('conam', 'sum'),
+        ]),# 這個歸戶(這個人)在相同(Time-delta), 刷卡的最大金額, 最小金額, .., 總金額
+        (["cano","time_elapsed_between_last_transactions"], [
+            ('conam', 'count'),
+            ('conam', 'min'),
+            ('conam', 'max'),
+            ('conam', 'mean'),
+            ('conam', 'median'),
+            ('conam', 'var'),
+            ('conam', 'sum'),
+        ]),# 這個卡號在相同(Time-delta), 刷卡的最大金額, 最小金額, .., 總金額
+        (["bacno","cano","time_elapsed_between_last_transactions"], [
+            ('conam', 'count'),
+            ('conam', 'min'),
+            ('conam', 'max'),
+            ('conam', 'mean'),
+            ('conam', 'median'),
+            ('conam', 'var'),
+            ('conam', 'sum'),
+        ]),# 這個歸戶,在這個卡號,在相同(Time-delta), 刷卡的最大金額, 最小金額, .., 總金額
+        (["mchno","time_elapsed_between_last_transactions"], [
+            ('conam', 'count'),
+            ('conam', 'min'),
+            ('conam', 'max'),
+            ('conam', 'mean'),
+            ('conam', 'median'),
+            ('conam', 'var'),
+            ('conam', 'sum'),
+        ]),# 這個商店在相同(Time-delta), 刷卡的最大金額, 最小金額, .., 總金額
 
+    ]
     # feature selection
     FEATURE_GRAVEYARD = [] # list of feature names
     FEATURE_USELESSNESS = ['var_iterm_BY_contp', 'median_iterm_BY_stscd', 'median_iterm_BY_stocn', 'median_iterm_BY_scity', 
