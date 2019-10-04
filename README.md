@@ -9,8 +9,6 @@ The first time you should run **sh run.sh** to extract features. After that, you
 sh run.sh
 ```
 ```
-
-```
 make train-lgb-fs
 ```
 ### Reuslt
