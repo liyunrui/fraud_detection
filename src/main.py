@@ -113,7 +113,7 @@ def main(args):
         logger.info("Test application df shape: {}".format(df_test.shape))
 
     with timer("Add cano/bacno latent feature"):
-        df = pd.read_csv("../features/bacno_latent_features_w_cano.csv.csv")
+        df = pd.read_csv("../features/bacno_latent_features_w_cano.csv")
         df_train = df_train.merge(df, on = "bacno", how = "left")
         df_test = df_test.merge(df, on = "bacno", how = "left")
         df = pd.read_csv("../features/cano_latent_features.csv")
