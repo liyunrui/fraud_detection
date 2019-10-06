@@ -45,8 +45,7 @@ def bayes_parameter_opt_lgb(X, y,
     def lgb_eval(num_leaves, feature_fraction, bagging_fraction,
                  max_depth, lambda_l1, lambda_l2, min_split_gain, 
                  min_child_weight):
-        params = {#'application':'binary',
-                    objective='binary:logistic'
+        params = {'application':'binary',
                   'num_iterations': n_estimators, 
                   'learning_rate':learning_rate, 
                   'early_stopping_round':100, 

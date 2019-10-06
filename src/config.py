@@ -224,6 +224,69 @@ class Configs:
                 ('conam', 'sum'),
             ]),
     ]
+
+    HOUR_AGG_SEC_LEVEL_RECIPE_BACNO = [
+        (["bacno","day_hr_min"], [
+                ('conam', 'count'),
+                ('conam', 'min'),
+                ('conam', 'max'),
+                ('conam', 'mean'),
+                ('conam', 'median'),
+                ('conam', 'var'),
+                ('conam', 'sum'),
+            ]), # 同一歸戶, 在同一天, 同一分鐘, 刷了幾次卡, 刷卡最大金額, ...
+        (["bacno","day_hr_min_sec"], [
+                ('conam', 'count'),
+                ('conam', 'min'),
+                ('conam', 'max'),
+                ('conam', 'mean'),
+                ('conam', 'median'),
+                ('conam', 'var'),
+                ('conam', 'sum'),
+            ]), # 同一歸戶, 在同一天, 同一分鐘, 同一秒鐘, 刷了幾次卡, 刷卡最大金額, ...
+    ]
+    HOUR_AGG_SEC_LEVEL_RECIPE_CANO = [
+        (["cano","day_hr_min"], [
+                ('conam', 'count'),
+                ('conam', 'min'),
+                ('conam', 'max'),
+                ('conam', 'mean'),
+                ('conam', 'median'),
+                ('conam', 'var'),
+                ('conam', 'sum'),
+            ]), # 同一卡號, 在同一天, 同一分鐘, 刷了幾次卡, 刷卡最大金額, ...
+        (["cano","day_hr_min_sec"], [
+                ('conam', 'count'),
+                ('conam', 'min'),
+                ('conam', 'max'),
+                ('conam', 'mean'),
+                ('conam', 'median'),
+                ('conam', 'var'),
+                ('conam', 'sum'),
+            ]), # 同一卡號, 在同一天, 同一分鐘, 同一秒鐘, 刷了幾次卡, 刷卡最大金額, ...
+    ]
+    HOUR_AGG_SEC_LEVEL_RECIPE_MCHNO = [
+        (["mchno","day_hr_min"], [
+                ('conam', 'count'),
+                ('conam', 'min'),
+                ('conam', 'max'),
+                ('conam', 'mean'),
+                ('conam', 'median'),
+                ('conam', 'var'),
+                ('conam', 'sum'),
+            ]), # 同一店家, 在同一天, 同一分鐘, 刷了幾次卡, 刷卡最大金額, ...
+        (["mchno","day_hr_min_sec"], [
+                ('conam', 'count'),
+                ('conam', 'min'),
+                ('conam', 'max'),
+                ('conam', 'mean'),
+                ('conam', 'median'),
+                ('conam', 'var'),
+                ('conam', 'sum'),
+            ]), # 同一店家, 在同一天, 同一分鐘, 同一秒鐘, 刷了幾次卡, 刷卡最大金額, ...
+
+    ]
+
     CANO_CONAM_COUNT_RECIPE = [
         (["cano","conam"], [
                 ('bacno', 'count'),
@@ -420,6 +483,25 @@ class Configs:
         ]),# 這個商店在相同(Time-delta), 刷卡的最大金額, 最小金額, .., 總金額
 
     ]
+    # rolling stats
+    HISTORY_RECIPE = [
+            (["bacno"], [
+                ('conam', 'mean'),
+            ]), 
+            (["cano"], [
+                ('conam', 'mean'),
+            ]), 
+            (["mchno"], [
+                ('conam', 'mean'),
+            ]), 
+            (["stocn"], [
+                ('conam', 'mean'),
+            ]), 
+           (["scity"], [
+                ('conam', 'mean'),
+            ]), 
+    ]
+
     # feature selection
     FEATURE_GRAVEYARD = [] # list of feature names
     FEATURE_USELESSNESS = ['var_iterm_BY_contp', 'median_iterm_BY_stscd', 'median_iterm_BY_stocn', 'median_iterm_BY_scity', 
@@ -434,14 +516,14 @@ class Configs:
     'min_iterm_BY_mchno', 'sum_iterm_BY_stocn', 'sum_iterm_BY_stscd', 'min_conam_BY_bacno_cano', 
     'max_iterm_BY_bacno_cano', 'var_iterm_BY_stscd',
 
-     'sum_time_elapsed_between_last_transactions_BY_bacno_cano', 'sum_iterm_BY_contp', 'max_iterm_BY_acqic',
-     'mean_iterm_BY_contp', 'mean_iterm_BY_csmcu', 'max_iterm_BY_contp', 
-     'mean_time_elapsed_between_last_transactions_BY_bacno_cano', 
-     'var_time_elapsed_between_last_transactions_BY_bacno_cano', 
-     'min_time_elapsed_between_last_transactions_BY_bacno_cano', 
-     'min_iterm_BY_cano', 'var_conam_BY_contp', 'max_time_elapsed_between_last_transactions_BY_bacno_cano', 
-     'median_time_elapsed_between_last_transactions_BY_bacno_cano', 
-     'max_iterm_BY_stocn'
+     # 'sum_time_elapsed_between_last_transactions_BY_bacno_cano', 'sum_iterm_BY_contp', 'max_iterm_BY_acqic',
+     # 'mean_iterm_BY_contp', 'mean_iterm_BY_csmcu', 'max_iterm_BY_contp', 
+     # 'mean_time_elapsed_between_last_transactions_BY_bacno_cano', 
+     # 'var_time_elapsed_between_last_transactions_BY_bacno_cano', 
+     # 'min_time_elapsed_between_last_transactions_BY_bacno_cano', 
+     # 'min_iterm_BY_cano', 'var_conam_BY_contp', 'max_time_elapsed_between_last_transactions_BY_bacno_cano', 
+     # 'median_time_elapsed_between_last_transactions_BY_bacno_cano', 
+     # 'max_iterm_BY_stocn'
 
 
     ]

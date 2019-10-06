@@ -12,9 +12,11 @@ import numpy as np
 from contextlib import contextmanager
 import gc 
 from util import s_to_time_format, string_to_datetime, hour_to_range, kfold_lightgbm, kfold_xgb
-from util import _time_elapsed_between_last_transactions,time_elapsed_between_last_transactions
-from util import num_transaction_in_past_n_days
+from util import rolling_stats_target_by_cols
+#from util import _time_elapsed_between_last_transactions,time_elapsed_between_last_transactions
+#from util import num_transaction_in_past_n_days
 #from util import add_auto_encoder_feature
+#from util import group_target_by_cols_split_by_users
 from time import strftime, localtime
 import logging
 import sys
@@ -40,8 +42,10 @@ def group_target_by_cols(df_train, df_test, recipe):
             tmp = tmp.reset_index().rename(index=str, columns={target: name_grouped_target})
             df_train = df_train.merge(tmp, how='left', on=cols)
             df_test = df_test.merge(tmp, how='left', on=cols)
-    del tmp
-    gc.collect()
+
+        # reduced memory    
+        del tmp
+        gc.collect()
     
     return df_train, df_test
 
@@ -79,6 +83,10 @@ def main(args):
             df["hour_range"] = df.loctm_.apply(lambda x: hour_to_range(x.hour)).astype("category")
             # removed the columns no need
             df.drop(columns = ["loctm_"], axis = 1, inplace = True)
+            # auxiliary fields
+            df["day_hr_min"] = ["{}:{}:{}".format(i,j,k) for i,j,k in zip(df.locdt,df.loctm_hour_of_day,df.loctm_minute_of_hour)]
+            df["day_hr_min_sec"] = ["{}:{}:{}:{}".format(i,j,k,z) for i,j,k,z in zip(df.locdt,df.loctm_hour_of_day,df.loctm_minute_of_hour,df.loctm_second_of_min)]
+
         logger.info("Train application df shape: {}".format(df_train.shape))
         logger.info("Test application df shape: {}".format(df_test.shape))
 
@@ -113,7 +121,7 @@ def main(args):
         logger.info("Test application df shape: {}".format(df_test.shape))
 
     with timer("Add cano/bacno latent feature"):
-        df = pd.read_csv("../features/bacno_latent_features.csv")
+        df = pd.read_csv("../features/bacno_latent_features_w_cano.csv")
         df_train = df_train.merge(df, on = "bacno", how = "left")
         df_test = df_test.merge(df, on = "bacno", how = "left")
         df = pd.read_csv("../features/cano_latent_features.csv")
@@ -158,34 +166,62 @@ def main(args):
         logger.info("Train application df shape: {}".format(df_train.shape))
         logger.info("Test application df shape: {}".format(df_test.shape))
 
-    with timer("Add elapsed time feature"):
-        df = pd.concat([df_train, df_test], axis = 0)
-        df.sort_values(by = ["bacno","locdt"], inplace = True)
-        
-        df["time_elapsed_between_last_transactions"] = df[["bacno","locdt"]] \
-        .groupby("bacno").apply(_time_elapsed_between_last_transactions).values
-        
-        df_train = df[~df.fraud_ind.isnull()]
-        df_test = df[df.fraud_ind.isnull()]
-        
-        df_test.drop(columns = ["fraud_ind"], axis = 1, inplace = True)
-        del df
-        gc.collect()
-
-        df_train["time_elapsed_between_last_transactions"] = df_train[["bacno","locdt","time_elapsed_between_last_transactions"]] \
-        .groupby(["bacno","locdt"]).apply(time_elapsed_between_last_transactions).values
-        
-        df_test["time_elapsed_between_last_transactions"] = df_test[["bacno","locdt","time_elapsed_between_last_transactions"]] \
-        .groupby(["bacno","locdt"]).apply(time_elapsed_between_last_transactions).values
-        
+    with timer("Add time second-level feature on bacno"):
+        df_train, df_test = group_target_by_cols(
+            df_train, 
+            df_test, 
+            Configs.HOUR_AGG_SEC_LEVEL_RECIPE_BACNO,
+            )
         logger.info("Train application df shape: {}".format(df_train.shape))
         logger.info("Test application df shape: {}".format(df_test.shape))
 
-    with timer("Add elapsed time aggregate feature"):
-        df_train, df_test = group_target_by_cols(df_train, df_test, Configs.TIME_ELAPSED_AGG_RECIPE)
-
+    with timer("Add time second-level feature on cano"):
+        df_train, df_test = group_target_by_cols(
+            df_train, 
+            df_test, 
+            Configs.HOUR_AGG_SEC_LEVEL_RECIPE_CANO,
+            )
         logger.info("Train application df shape: {}".format(df_train.shape))
-        logger.info("Test application df shape: {}".format(df_test.shape))  
+        logger.info("Test application df shape: {}".format(df_test.shape))
+
+    with timer("Add time second-level feature on mchno"):
+        df_train, df_test = group_target_by_cols(
+            df_train, 
+            df_test, 
+            Configs.HOUR_AGG_SEC_LEVEL_RECIPE_MCHNO,
+            )
+        logger.info("Train application df shape: {}".format(df_train.shape))
+        logger.info("Test application df shape: {}".format(df_test.shape))
+
+
+    # with timer("Add elapsed time feature"):
+    #     df = pd.concat([df_train, df_test], axis = 0)
+    #     df.sort_values(by = ["bacno","locdt"], inplace = True)
+        
+    #     df["time_elapsed_between_last_transactions"] = df[["bacno","locdt"]] \
+    #     .groupby("bacno").apply(_time_elapsed_between_last_transactions).values
+        
+    #     df_train = df[~df.fraud_ind.isnull()]
+    #     df_test = df[df.fraud_ind.isnull()]
+        
+    #     df_test.drop(columns = ["fraud_ind"], axis = 1, inplace = True)
+    #     del df
+    #     gc.collect()
+
+    #     df_train["time_elapsed_between_last_transactions"] = df_train[["bacno","locdt","time_elapsed_between_last_transactions"]] \
+    #     .groupby(["bacno","locdt"]).apply(time_elapsed_between_last_transactions).values
+        
+    #     df_test["time_elapsed_between_last_transactions"] = df_test[["bacno","locdt","time_elapsed_between_last_transactions"]] \
+    #     .groupby(["bacno","locdt"]).apply(time_elapsed_between_last_transactions).values
+        
+    #     logger.info("Train application df shape: {}".format(df_train.shape))
+    #     logger.info("Test application df shape: {}".format(df_test.shape))
+
+    # with timer("Add elapsed time aggregate feature"):
+    #     df_train, df_test = group_target_by_cols(df_train, df_test, Configs.TIME_ELAPSED_AGG_RECIPE)
+
+    #     logger.info("Train application df shape: {}".format(df_train.shape))
+    #     logger.info("Test application df shape: {}".format(df_test.shape))  
 
     # with timer("Add elapsed time related feature"):
     #     df_train, df_test = group_target_by_cols(df_train, df_test, Configs.TIME_ELAPSED_AGG_RECIPE_2)
@@ -193,24 +229,30 @@ def main(args):
     #     logger.info("Train application df shape: {}".format(df_train.shape))
     #     logger.info("Test application df shape: {}".format(df_test.shape))  
 
-    with timer("Add historical-related feature"):
-        df = pd.concat([df_train, df_test], axis = 0)
-        df.sort_values(by = ["bacno","locdt"], inplace = True)
+    # with timer("Add historical-related feature"):
+    #     df = pd.concat([df_train, df_test], axis = 0)
+    #     df.sort_values(by = ["bacno","locdt"], inplace = True)
         
-        for past_n_days in [2,3,4,5,6,7,14,30]:
-            df["num_transaction_in_past_{}_days".format(past_n_days)] = df[["bacno","locdt"]].groupby("bacno")\
-            .apply(lambda x: num_transaction_in_past_n_days(x,past_n_days)).values
+    #     for past_n_days in [2,3,4,5,6,7,14,30]:
+    #         df["num_transaction_in_past_{}_days".format(past_n_days)] = df[["bacno","locdt"]].groupby("bacno")\
+    #         .apply(lambda x: num_transaction_in_past_n_days(x,past_n_days)).values
 
-        df_train = df[~df.fraud_ind.isnull()]
-        df_test = df[df.fraud_ind.isnull()]
+    #     df_train = df[~df.fraud_ind.isnull()]
+    #     df_test = df[df.fraud_ind.isnull()]
         
-        df_test.drop(columns = ["fraud_ind"], axis = 1, inplace = True)
-        del df
-        gc.collect()
+    #     df_test.drop(columns = ["fraud_ind"], axis = 1, inplace = True)
+    #     del df
+    #     gc.collect()
+
+    #     logger.info("Train application df shape: {}".format(df_train.shape))
+    #     logger.info("Test application df shape: {}".format(df_test.shape))  
+
+    # with timer("Add descriptive stats in past transactions feature"):
+    #     df_train, df_test = rolling_stats_target_by_cols(df_train,df_test, Configs.HISTORY_RECIPE)
+
+    #     logger.info("Train application df shape: {}".format(df_train.shape))
+    #     logger.info("Test application df shape: {}".format(df_test.shape))  
        
-        print("Train application df shape: {}".format(df_train.shape))
-        print("Test application df shape: {}".format(df_test.shape))
-
     # with timer("Add scity/bacno latent feature"):
     #     df = pd.read_csv("../features/bacno_latent_features_w_scity.csv")
     #     df_train = df_train.merge(df, on = "bacno", how = "left")
@@ -249,23 +291,7 @@ def main(args):
     #     logger.info("Train application df shape: {}".format(df_train.shape))
     #     logger.info("Test application df shape: {}".format(df_test.shape))
 
-    # with timer("Add autoencoder feature"):
-    #     from keras.models import load_model
-    #     from autoencoder import value_to_count, feature_normalization_auto
 
-    #     autoencoder = load_model('/data/yunrui_li/fraud/fraud_detection/models/auto_encoder.h5')
-
-    #     df_train_, df_test_ = value_to_count(df_train, df_test, mode = "test")
-    #     X_train, X_test = feature_normalization_auto(df_train_, df_test_, mode = "test")
-
-    #     df_train = add_auto_encoder_feature(df_train,X_train, autoencoder, add_reconstructed_vec = True)
-    #     df_test = add_auto_encoder_feature(df_test,X_test, autoencoder, add_reconstructed_vec = True)
-
-    #     del df_train_, df_test_, X_train, X_test 
-    #     gc.collect()
-
-    #     logger.info("Train application df shape: {}".format(df_train.shape))
-    #     logger.info("Test application df shape: {}".format(df_test.shape))
 
     with timer("Run LightGBM with kfold"):
         if args.feature_selection:
@@ -282,7 +308,12 @@ def main(args):
             logger.info("Test application df shape: {}".format(df_test.shape))
 
         for df in [df_train, df_test]:
-            df.drop(columns = ["loctm_hour_of_day","loctm_minute_of_hour", "loctm_second_of_min"], axis = 1, inplace = True)
+            df.drop(columns = ["loctm_hour_of_day",
+                               "loctm_minute_of_hour", 
+                               "loctm_second_of_min",
+                               "day_hr_min",
+                               "day_hr_min_sec",
+                               ], axis = 1, inplace = True)
    
         
         ITERATION = (5 if args.TEST_NULL_HYPO else 1)

@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 from sklearn.metrics import f1_score
 import gc
+from tqdm import tqdm
 
 def string_padding(s):
     """
@@ -97,6 +98,86 @@ def num_transaction_in_past_n_days(df, n):
                 c+=1
         output.append(c)
     return pd.Series(output) # return Series instead of list
+
+def rolling_stats_target_by_cols(df_train, df_test, recipe, window = 2):
+    df = pd.concat([df_train, df_test], axis = 0)
+    #df.sort_values(by = ["bacno","locdt"], inplace = True)
+    
+    for m in range(len(recipe)):
+        cols = recipe[m][0]
+        #print (cols + ["locdt"])
+        df.sort_values(by = cols + ["locdt"], inplace = True)
+        for n in range(len(recipe[m][1])):
+            target = recipe[m][1][n][0]
+            method = recipe[m][1][n][1]
+            name_grouped_target = method+"_"+target+'_BY_'+'_'.join(cols)+"_"+"in_past_{}_transactions".format(window)
+            #print (name_grouped_target)
+            if method == "mean":
+                df[name_grouped_target] = df.groupby(cols)[target].rolling(window=window).mean().values
+                
+    df_train = df[~df.fraud_ind.isnull()]
+    df_test = df[df.fraud_ind.isnull()]
+
+    df_test.drop(columns = ["fraud_ind"], axis = 1, inplace = True)
+    del df
+    gc.collect()
+    
+    return df_train, df_test
+
+def chunks(l, n):
+    """Yield successive n-sized chunks from l."""
+    out = []
+    for i in range(0, len(l), n):
+        out.append(l[i:i + n])
+    return out
+
+def group_target_by_cols_split_by_users(df_train, df_test, recipe, user_column = "bacno", num_partitions = 10):
+    """
+    Split and merge dataframe for memory problem
+    """
+    df = pd.concat([df_train, df_test], axis = 0)
+
+    df_users = df[user_column].unique().tolist()
+    train_users = df_train[user_column].unique().tolist()
+    test_users = df_test[user_column].unique().tolist()      
+    #o_feats = df.columns.tolist()
+    
+    output = []
+    for partition_users in tqdm(chunks(df_users,num_partitions)):
+        print ("partition_users",len(partition_users))
+        tmp_df_ls = [] # including partiton of the users w new features we just created
+        c = 0
+        for m in range(len(recipe)):
+            cols = recipe[m][0]
+            for n in range(len(recipe[m][1])):
+                target = recipe[m][1][n][0]
+                method = recipe[m][1][n][1]
+                name_grouped_target = method+"_"+target+'_BY_'+'_'.join(cols)
+                df_split_by_users = df[df[user_column].isin(partition_users)]
+                tmp = df_split_by_users[cols + [target]].groupby(cols).agg(method)
+                tmp = tmp.reset_index().rename(index=str, columns={target: name_grouped_target})
+                if c!= 0:
+                    tmp_df_ls.append(df_split_by_users.merge(tmp, how='left', on=cols)[name_grouped_target])
+                else:
+                    tmp_df_ls.append(df_split_by_users.merge(tmp, how='left', on=cols))
+                c+=1
+                # reduce memory
+                del df_split_by_users,tmp
+                gc.collect()             
+        tmp_df_ls = pd.concat(tmp_df_ls, axis = 1)
+        output.append(tmp_df_ls)
+        # reduce memory
+        del tmp_df_ls
+        gc.collect()             
+
+    df = pd.concat(output, axis = 0) # including all the users w new features we just created
+
+    df_train = df[df[user_column].isin(train_users)]
+    df_test = df[df[user_column].isin(test_users)]
+    df_test.drop(columns = ["fraud_ind"], axis = 1, inplace = True)
+    del df
+    gc.collect()  
+    return df_train, df_test
 
 # Display/plot feature importance
 def display_importances(feature_importance_df_, model):
@@ -283,7 +364,7 @@ def kfold_xgb(df_train, df_test, num_folds, args, logger, stratified = False, se
                 )
         else:
             clf = XGBClassifier(
-                n_jobs = -1,
+                n_jobs = 1,
                 max_depth=3,
                 learning_rate=0.05,
                 n_estimators=10000,
