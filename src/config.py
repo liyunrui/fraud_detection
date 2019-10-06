@@ -286,6 +286,63 @@ class Configs:
             ]), # 同一店家, 在同一天, 同一分鐘, 同一秒鐘, 刷了幾次卡, 刷卡最大金額, ...
 
     ]
+    HOUR_AGG_SEC_LEVEL_RECIPE = [
+        (["csmcu","day_hr_min"], [
+                ('conam', 'count'),
+                ('conam', 'min'),
+                ('conam', 'max'),
+                ('conam', 'mean'),
+                ('conam', 'median'),
+                ('conam', 'var'),
+                ('conam', 'sum'),
+            ]), # 同一消費地幣別, 在同一天, 同一分鐘, 刷了幾次卡, 刷卡最大金額, ...
+        (["csmcu","day_hr_min_sec"], [
+                ('conam', 'count'),
+                ('conam', 'min'),
+                ('conam', 'max'),
+                ('conam', 'mean'),
+                ('conam', 'median'),
+                ('conam', 'var'),
+                ('conam', 'sum'),
+            ]), # 同一消費地幣別, 在同一天, 同一分鐘, 同一秒鐘, 刷了幾次卡, 刷卡最大金額, ...
+        (["stocn","day_hr_min"], [
+                ('conam', 'count'),
+                ('conam', 'min'),
+                ('conam', 'max'),
+                ('conam', 'mean'),
+                ('conam', 'median'),
+                ('conam', 'var'),
+                ('conam', 'sum'),
+            ]), # 同一歸戶, 在同一天, 同一分鐘, 刷了幾次卡, 刷卡最大金額, ...
+        (["stocn","day_hr_min_sec"], [
+                ('conam', 'count'),
+                ('conam', 'min'),
+                ('conam', 'max'),
+                ('conam', 'mean'),
+                ('conam', 'median'),
+                ('conam', 'var'),
+                ('conam', 'sum'),
+            ]), # 同一歸戶, 在同一天, 同一分鐘, 同一秒鐘, 刷了幾次卡, 刷卡最大金額, ...
+
+        (["scity","day_hr_min"], [
+                ('conam', 'count'),
+                ('conam', 'min'),
+                ('conam', 'max'),
+                ('conam', 'mean'),
+                ('conam', 'median'),
+                ('conam', 'var'),
+                ('conam', 'sum'),
+            ]), # 同一歸戶, 在同一天, 同一分鐘, 刷了幾次卡, 刷卡最大金額, ...
+        (["scity","day_hr_min_sec"], [
+                ('conam', 'count'),
+                ('conam', 'min'),
+                ('conam', 'max'),
+                ('conam', 'mean'),
+                ('conam', 'median'),
+                ('conam', 'var'),
+                ('conam', 'sum'),
+            ]), # 同一歸戶, 在同一天, 同一分鐘, 同一秒鐘, 刷了幾次卡, 刷卡最大金額, ...
+    ]
 
     CANO_CONAM_COUNT_RECIPE = [
         (["cano","conam"], [
