@@ -1,3 +1,5 @@
+null-importance:
+		python main.py --train_file ../../dataset/train.csv --test_file ../../dataset/test.csv --result_path ../result/submission_null.csv --feature_selection True --TEST_NULL_HYPO True
 train-lgb:
 		python main.py --train_file ../../dataset/train.csv --test_file ../../dataset/test.csv --result_path ../result/submission_lgb.csv 
 train-lgb-fs:

@@ -252,18 +252,18 @@ def kfold_lightgbm(df_train, df_test, num_folds, args, logger, stratified = Fals
         # LightGBM parameters found by Bayesian optimization
         if args.TEST_NULL_HYPO:
             clf = lgb.LGBMClassifier(
-                nthread=int(multiprocessing.cpu_count()*args.CPU_USE_RATE),
+                n_jobs = 3,
+                # nthread=int(multiprocessing.cpu_count()*args.CPU_USE_RATE),
                 n_estimators=10000,
                 learning_rate=0.02,
                 num_leaves=127,
                 max_depth=args.MAX_DEPTH,
-                silent=-1,
-                verbose=-1,
-                random_state=args.seed,
+                random_state=seed,
+                scale_pos_weight=args.SCALE_POS_WEIGHT
                 )
         else:
             clf = lgb.LGBMClassifier(
-                n_jobs = -1,
+                n_jobs = 17,
                 n_estimators=10000,
                 learning_rate=0.02, # 0.02
                 num_leaves=args.NUM_LEAVES,
@@ -356,10 +356,10 @@ def kfold_xgb(df_train, df_test, num_folds, args, logger, stratified = False, se
                 nthread=int(multiprocessing.cpu_count()*args.CPU_USE_RATE),
                 n_estimators=10000,
                 learning_rate=0.02,
+                objective='binary:logistic',
+                booster='gbtree',
                 num_leaves=127,
                 max_depth=args.MAX_DEPTH,
-                silent=-1,
-                verbose=-1,
                 random_state=seed,
                 )
         else:

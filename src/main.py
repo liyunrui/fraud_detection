@@ -202,6 +202,31 @@ def main(args):
         logger.info("Train application df shape: {}".format(df_train.shape))
         logger.info("Test application df shape: {}".format(df_test.shape))
 
+    with timer("Add time second-level feature on acqic/csmcu/stocn/scity"):
+        df_train, df_test = group_target_by_cols(
+            df_train, 
+            df_test, 
+            Configs.HOUR_AGG_SEC_LEVEL_RECIPE_2,
+            )
+        logger.info("Train application df shape: {}".format(df_train.shape))
+        logger.info("Test application df shape: {}".format(df_test.shape))
+
+    with timer("Add conam-related feature v3"):
+        df_train, df_test = group_target_by_cols(
+            df_train, 
+            df_test, 
+            Configs.CONAM_AGG_RECIPE_3,
+            )
+        logger.info("Train application df shape: {}".format(df_train.shape))
+        logger.info("Test application df shape: {}".format(df_test.shape))
+
+    with timer("Add locdt-related feature v2"):
+        df_train, df_test = group_target_by_cols(df_train, df_test, Configs.LOCDT_CONAM_RECIPE_2)
+
+        logger.info("Train application df shape: {}".format(df_train.shape))
+        logger.info("Test application df shape: {}".format(df_test.shape))
+
+
     # with timer("Add elapsed time feature"):
     #     df = pd.concat([df_train, df_test], axis = 0)
     #     df.sort_values(by = ["bacno","locdt"], inplace = True)

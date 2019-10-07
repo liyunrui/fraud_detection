@@ -6,74 +6,140 @@ class Configs:
     # aggregate 
     CONAM_AGG_RECIPE_1 = [
         (["cano"], [
+                ('conam', 'count'),
                 ('conam', 'min'),
                 ('conam', 'max'),
                 ('conam', 'mean'),
                 ('conam', 'median'),
                 ('conam', 'var'),
                 ('conam', 'sum'),
-            ]),
+            ]), # 同一卡號, 刷了幾次卡, 刷卡最大金額,...,etc.
         (["bacno","cano"], [
+            ('conam', 'count'),
             ('conam', 'min'),
             ('conam', 'max'),
             ('conam', 'mean'),
             ('conam', 'median'),
             ('conam', 'var'),
             ('conam', 'sum'),
-        ]),
+        ]), # 同一歸戶且同一卡號, 刷了幾次卡, 刷卡最大金額,..,etc.
 
+    ]
+
+    CONAM_AGG_RECIPE_3 = [
+        (["bacno","csmcu"], [
+            ('conam', 'count'),
+            ('conam', 'min'),
+            ('conam', 'max'),
+            ('conam', 'mean'),
+            ('conam', 'median'),
+            ('conam', 'var'),
+            ('conam', 'sum'),
+        ]), # 同一歸戶且同ㄧ消費地幣別, 刷了幾次卡, 刷卡最大金額,...,etc.
+        (["bacno","acqic"], [
+            ('conam', 'count'),
+            ('conam', 'min'),
+            ('conam', 'max'),
+            ('conam', 'mean'),
+            ('conam', 'median'),
+            ('conam', 'var'),
+            ('conam', 'sum'),
+        ]), # 同一歸戶且同ㄧ收單行代碼, 刷了幾次卡, 刷卡最大金額,...,etc.
+        (["bacno","mcc"], [
+            ('conam', 'count'),
+            ('conam', 'min'),
+            ('conam', 'max'),
+            ('conam', 'mean'),
+            ('conam', 'median'),
+            ('conam', 'var'),
+            ('conam', 'sum'),
+        ]), # 同一歸戶且同ㄧmcc code, 刷了幾次卡, 刷卡最大金額,...,etc.
+        (["bacno","stscd"], [
+            ('conam', 'count'),
+            ('conam', 'min'),
+            ('conam', 'max'),
+            ('conam', 'mean'),
+            ('conam', 'median'),
+            ('conam', 'var'),
+            ('conam', 'sum'),
+        ]), # 同一歸戶且同一狀態代碼, 刷了幾次卡, 刷卡最大金額,...,etc.
+        (["bacno","contp"], [
+            ('conam', 'count'),
+            ('conam', 'min'),
+            ('conam', 'max'),
+            ('conam', 'mean'),
+            ('conam', 'median'),
+            ('conam', 'var'),
+            ('conam', 'sum'),
+        ]), # 同一歸戶且同ㄧ交易類別, 刷了幾次卡, 刷卡最大金額,...,etc.
+        (["bacno","etymd"], [
+            ('conam', 'count'),
+            ('conam', 'min'),
+            ('conam', 'max'),
+            ('conam', 'mean'),
+            ('conam', 'median'),
+            ('conam', 'var'),
+            ('conam', 'sum'),
+        ]), # 同一歸戶且同一交易型號, 刷了幾次卡, 刷卡最大金額,...,etc.
     ]
 
     CONAM_AGG_RECIPE_2 = [
         (["acqic"], [
+                ('conam', 'count'),
                 ('conam', 'min'),
                 ('conam', 'max'),
                 ('conam', 'mean'),
                 ('conam', 'median'),
                 ('conam', 'var'),
                 ('conam', 'sum'),
-            ]),
+            ]), # 同一收單行代碼, 刷了幾次卡, 刷卡最大金額,...,etc.
         (["bacno"], [
+                ('conam', 'count'),
                 ('conam', 'min'),
                 ('conam', 'max'),
                 ('conam', 'mean'),
                 ('conam', 'median'),
                 ('conam', 'var'),
                 ('conam', 'sum'),
-            ]),
+            ]), # 同一卡號, 刷了幾次卡, 刷卡最大金額, ...,etc.
         (["csmcu"], [
+                ('conam', 'count'),
                 ('conam', 'min'),
                 ('conam', 'max'),
                 ('conam', 'mean'),
                 ('conam', 'median'),
                 ('conam', 'var'),
                 ('conam', 'sum'),
-            ]),
+            ]), #同一消費地幣別, 刷了幾次卡, 刷卡最大金額, ...,etc.
         (["mchno"], [
+                ('conam', 'count'),
                 ('conam', 'min'),
                 ('conam', 'max'),
                 ('conam', 'mean'),
                 ('conam', 'median'),
                 ('conam', 'var'),
                 ('conam', 'sum'),
-            ]),
+            ]), #同一商店, 刷了幾次卡, 刷卡最大金額, ...,etc.
         (["mcc"], [
+                ('conam', 'count'),
                 ('conam', 'min'),
                 ('conam', 'max'),
                 ('conam', 'mean'),
                 ('conam', 'median'),
                 ('conam', 'var'),
                 ('conam', 'sum'),
-            ]),
+            ]),  #同一mcc代碼, 刷了幾次卡, 刷卡最大金額, ...,etc.
         (["stscd"], [
+                ('conam', 'count'),
                 ('conam', 'min'),
                 ('conam', 'max'),
                 ('conam', 'mean'),
                 ('conam', 'median'),
                 ('conam', 'var'),
                 ('conam', 'sum'),
-            ]),
+            ]), #同一狀態代碼, 刷了幾次卡, 刷卡最大金額, ...,etc.
         (["stocn"], [
+                ('conam', 'count'),
                 ('conam', 'min'),
                 ('conam', 'max'),
                 ('conam', 'mean'),
@@ -82,6 +148,7 @@ class Configs:
                 ('conam', 'sum'),
             ]),
         (["scity"], [
+                ('conam', 'count'),
                 ('conam', 'min'),
                 ('conam', 'max'),
                 ('conam', 'mean'),
@@ -90,13 +157,117 @@ class Configs:
                 ('conam', 'sum'),
             ]),
         (["contp"], [
+                ('conam', 'count'),
                 ('conam', 'min'),
                 ('conam', 'max'),
                 ('conam', 'mean'),
                 ('conam', 'median'),
                 ('conam', 'var'),
                 ('conam', 'sum'),
-            ]),
+            ]), #同一交易類別, 刷了幾次卡, 刷卡最大金額, ...,etc.
+        (["etymd"], [
+                ('conam', 'count'),
+                ('conam', 'min'),
+                ('conam', 'max'),
+                ('conam', 'mean'),
+                ('conam', 'median'),
+                ('conam', 'var'),
+                ('conam', 'sum'),
+            ]), #同一交易型號, 刷了幾次卡, 刷卡最大金額, ...,etc.
+    ]
+
+    CONAM_AGG_RECIPE_4 = [
+        (["hcefg"], [
+                ('conam', 'count'),
+                ('conam', 'min'),
+                ('conam', 'max'),
+                ('conam', 'mean'),
+                ('conam', 'median'),
+                ('conam', 'var'),
+                ('conam', 'sum'),
+            ]), # 同一支付型態, 刷了幾次卡, 刷卡最大金額,...,etc.
+        (["ovrlt"], [
+                ('conam', 'count'),
+                ('conam', 'min'),
+                ('conam', 'max'),
+                ('conam', 'mean'),
+                ('conam', 'median'),
+                ('conam', 'var'),
+                ('conam', 'sum'),
+            ]), # 同一超額註記碼, 刷了幾次卡, 刷卡最大金額,...,etc.
+        (["flbmk"], [
+                ('conam', 'count'),
+                ('conam', 'min'),
+                ('conam', 'max'),
+                ('conam', 'mean'),
+                ('conam', 'median'),
+                ('conam', 'var'),
+                ('conam', 'sum'),
+            ]), # 同一Fallback 註記, 刷了幾次卡, 刷卡最大金額,...,etc.
+        (["bacno","ecfg"], [
+            ('conam', 'min'),
+            ('conam', 'max'),
+            ('conam', 'mean'),
+            ('conam', 'median'),
+            ('conam', 'var'),
+            ('conam', 'sum'),
+        ]),
+        (["cano","ecfg"], [
+            ('conam', 'min'),
+            ('conam', 'max'),
+            ('conam', 'mean'),
+            ('conam', 'median'),
+            ('conam', 'var'),
+            ('conam', 'sum'),
+        ]),
+        (["bacno","flg_3dsmk"], [
+            ('conam', 'min'),
+            ('conam', 'max'),
+            ('conam', 'mean'),
+            ('conam', 'median'),
+            ('conam', 'var'),
+            ('conam', 'sum'),
+        ]),
+        (["cano","flg_3dsmk"], [
+            ('conam', 'min'),
+            ('conam', 'max'),
+            ('conam', 'mean'),
+            ('conam', 'median'),
+            ('conam', 'var'),
+            ('conam', 'sum'),
+        ]),
+        (["bacno","ovrlt"], [
+            ('conam', 'min'),
+            ('conam', 'max'),
+            ('conam', 'mean'),
+            ('conam', 'median'),
+            ('conam', 'var'),
+            ('conam', 'sum'),
+        ]),
+        (["cano","ovrlt"], [
+            ('conam', 'min'),
+            ('conam', 'max'),
+            ('conam', 'mean'),
+            ('conam', 'median'),
+            ('conam', 'var'),
+            ('conam', 'sum'),
+        ]),
+        (["bacno","flbmk"], [
+            ('conam', 'min'),
+            ('conam', 'max'),
+            ('conam', 'mean'),
+            ('conam', 'median'),
+            ('conam', 'var'),
+            ('conam', 'sum'),
+        ]),
+        (["cano","flbmk"], [
+            ('conam', 'min'),
+            ('conam', 'max'),
+            ('conam', 'mean'),
+            ('conam', 'median'),
+            ('conam', 'var'),
+            ('conam', 'sum'),
+        ]),
     ]
 
     ITERM_AGG_RECIPE = [
@@ -180,6 +351,14 @@ class Configs:
                 ('iterm', 'var'),
                 ('iterm', 'sum'),
             ]),
+        (["etymd"], [
+                ('iterm', 'min'),
+                ('iterm', 'max'),
+                ('iterm', 'mean'),
+                ('iterm', 'median'),
+                ('iterm', 'var'),
+                ('iterm', 'sum'),
+            ]), #同一交易型號, 刷了幾次卡, 刷卡最大金額, ...,etc.
         (["bacno","cano"], [
             ('iterm', 'min'),
             ('iterm', 'max'),
@@ -313,7 +492,7 @@ class Configs:
                 ('conam', 'median'),
                 ('conam', 'var'),
                 ('conam', 'sum'),
-            ]), # 同一歸戶, 在同一天, 同一分鐘, 刷了幾次卡, 刷卡最大金額, ...
+            ]), # 同一國家, 在同一天, 同一分鐘, 刷了幾次卡, 刷卡最大金額, ...
         (["stocn","day_hr_min_sec"], [
                 ('conam', 'count'),
                 ('conam', 'min'),
@@ -322,7 +501,7 @@ class Configs:
                 ('conam', 'median'),
                 ('conam', 'var'),
                 ('conam', 'sum'),
-            ]), # 同一歸戶, 在同一天, 同一分鐘, 同一秒鐘, 刷了幾次卡, 刷卡最大金額, ...
+            ]), # 同ㄧ城市, 在同一天, 同一分鐘, 同一秒鐘, 刷了幾次卡, 刷卡最大金額, ...
 
         (["scity","day_hr_min"], [
                 ('conam', 'count'),
@@ -342,6 +521,81 @@ class Configs:
                 ('conam', 'var'),
                 ('conam', 'sum'),
             ]), # 同一歸戶, 在同一天, 同一分鐘, 同一秒鐘, 刷了幾次卡, 刷卡最大金額, ...
+    ]
+
+    HOUR_AGG_SEC_LEVEL_RECIPE_2 = [
+        (["acqic","day_hr_min"], [
+                ('conam', 'count'),
+                ('conam', 'min'),
+                ('conam', 'max'),
+                ('conam', 'mean'),
+                ('conam', 'median'),
+                ('conam', 'var'),
+                ('conam', 'sum'),
+            ]), # 同一收單行代碼, 在同一天, 同一分鐘, 刷了幾次卡, 刷卡最大金額, ...
+        (["acqic","day_hr_min_sec"], [
+                ('conam', 'count'),
+                ('conam', 'min'),
+                ('conam', 'max'),
+                ('conam', 'mean'),
+                ('conam', 'median'),
+                ('conam', 'var'),
+                ('conam', 'sum'),
+            ]), # 同一歸戶,同一收單行代碼, 在同一天, 同一分鐘, 同一秒鐘, 刷了幾次卡, 刷卡最大金額, ...
+        (["bacno","acqic","day_hr_min"], [
+                ('conam', 'count'),
+                ('conam', 'min'),
+                ('conam', 'max'),
+                ('conam', 'mean'),
+                ('conam', 'median'),
+                ('conam', 'var'),
+                ('conam', 'sum'),
+            ]), # 同一歸戶,同一收單行代碼, 在同一天, 同一分鐘, 刷了幾次卡, 刷卡最大金額, ...
+        (["bacno","acqic","day_hr_min_sec"], [
+                ('conam', 'count'),
+                ('conam', 'min'),
+                ('conam', 'max'),
+                ('conam', 'mean'),
+                ('conam', 'median'),
+                ('conam', 'var'),
+                ('conam', 'sum'),
+            ]), # 同一收單行代碼, 在同一天, 同一分鐘, 同一秒鐘, 刷了幾次卡, 刷卡最大金額, ...
+        (["bacno","stocn","day_hr_min"], [
+                ('conam', 'count'),
+                ('conam', 'min'),
+                ('conam', 'max'),
+                ('conam', 'mean'),
+                ('conam', 'median'),
+                ('conam', 'var'),
+                ('conam', 'sum'),
+            ]), # 同一歸戶, 同ㄧ國家, 在同一天, 同一分鐘, 刷了幾次卡, 刷卡最大金額, ...
+        (["bacno","stocn","day_hr_min_sec"], [
+                ('conam', 'count'),
+                ('conam', 'min'),
+                ('conam', 'max'),
+                ('conam', 'mean'),
+                ('conam', 'median'),
+                ('conam', 'var'),
+                ('conam', 'sum'),
+            ]), # 同一歸戶, 同ㄧ國家, 在同一天, 同一分鐘, 同一秒鐘, 刷了幾次卡, 刷卡最大金額, ...
+        (["bacno","scity","day_hr_min"], [
+                ('conam', 'count'),
+                ('conam', 'min'),
+                ('conam', 'max'),
+                ('conam', 'mean'),
+                ('conam', 'median'),
+                ('conam', 'var'),
+                ('conam', 'sum'),
+            ]), # 同一歸戶, 同一城市, 在同一天, 同一分鐘, 刷了幾次卡, 刷卡最大金額, ...
+        (["bacno","scity","day_hr_min_sec"], [
+                ('conam', 'count'),
+                ('conam', 'min'),
+                ('conam', 'max'),
+                ('conam', 'mean'),
+                ('conam', 'median'),
+                ('conam', 'var'),
+                ('conam', 'sum'),
+            ]), # 同一歸戶, 同ㄧ城市, 在同一天, 同一分鐘, 同一秒鐘, 刷了幾次卡, 刷卡最大金額, ...
     ]
 
     CANO_CONAM_COUNT_RECIPE = [
@@ -388,6 +642,116 @@ class Configs:
                 ('conam', 'sum'),
             ]),
         (["bacno","locdt","stocn","scity"], [
+                ('conam', 'count'),
+                ('conam', 'min'),
+                ('conam', 'max'),
+                ('conam', 'mean'),
+                ('conam', 'median'),
+                ('conam', 'var'),
+                ('conam', 'sum'),
+            ]),
+    ]
+    LOCDT_CONAM_RECIPE_2 = [
+        (["cano","locdt"], [
+                ('conam', 'count'),
+                ('conam', 'min'),
+                ('conam', 'max'),
+                ('conam', 'mean'),
+                ('conam', 'median'),
+                ('conam', 'var'),
+                ('conam', 'sum'),
+            ]), # 這個卡號在同一天當中刷卡的次數, 刷卡的最大金額, 最小金額, .., 總金額
+        (["mchno","locdt"], [
+                ('conam', 'count'),
+                ('conam', 'min'),
+                ('conam', 'max'),
+                ('conam', 'mean'),
+                ('conam', 'median'),
+                ('conam', 'var'),
+                ('conam', 'sum'),
+            ]), # 這個商店在同一天當中刷卡的次數, 刷卡的最大金額, 最小金額, .., 總金額
+        (["scity","locdt"], [
+                ('conam', 'count'),
+                ('conam', 'min'),
+                ('conam', 'max'),
+                ('conam', 'mean'),
+                ('conam', 'median'),
+                ('conam', 'var'),
+                ('conam', 'sum'),
+            ]), # 這個城市在同一天當中刷卡的次數, 刷卡的最大金額, 最小金額, .., 總金額
+        (["stocn","locdt"], [
+                ('conam', 'count'),
+                ('conam', 'min'),
+                ('conam', 'max'),
+                ('conam', 'mean'),
+                ('conam', 'median'),
+                ('conam', 'var'),
+                ('conam', 'sum'),
+            ]), # 這個消費地在同一天當中刷卡的次數, 刷卡的最大金額, 最小金額, .., 總金額
+        (["contp","locdt"], [
+                ('conam', 'count'),
+                ('conam', 'min'),
+                ('conam', 'max'),
+                ('conam', 'mean'),
+                ('conam', 'median'),
+                ('conam', 'var'),
+                ('conam', 'sum'),
+            ]), # 這個交易類別在同一天當中刷卡的次數, 刷卡的最大金額, 最小金額, .., 總金額
+        (["etymd","locdt"], [
+                ('conam', 'count'),
+                ('conam', 'min'),
+                ('conam', 'max'),
+                ('conam', 'mean'),
+                ('conam', 'median'),
+                ('conam', 'var'),
+                ('conam', 'sum'),
+            ]), # 這個交易型號在同一天當中刷卡的次數, 刷卡的最大金額, 最小金額, .., 總金額
+        (["mcc","locdt"], [
+                ('conam', 'count'),
+                ('conam', 'min'),
+                ('conam', 'max'),
+                ('conam', 'mean'),
+                ('conam', 'median'),
+                ('conam', 'var'),
+                ('conam', 'sum'),
+            ]), # 這個mcc code在同一天當中刷卡的次數, 刷卡的最大金額, 最小金額, .., 總金額
+        (["acqic","locdt"], [
+                ('conam', 'count'),
+                ('conam', 'min'),
+                ('conam', 'max'),
+                ('conam', 'mean'),
+                ('conam', 'median'),
+                ('conam', 'var'),
+                ('conam', 'sum'),
+            ]), # 這個收單號在同一天當中刷卡的次數, 刷卡的最大金額, 最小金額, .., 總金額
+        (["cano","locdt","scity"], [
+                ('conam', 'count'),
+                ('conam', 'min'),
+                ('conam', 'max'),
+                ('conam', 'mean'),
+                ('conam', 'median'),
+                ('conam', 'var'),
+                ('conam', 'sum'),
+            ]),
+        (["cano","locdt","stocn"], [
+                ('conam', 'count'),
+                ('conam', 'min'),
+                ('conam', 'max'),
+                ('conam', 'mean'),
+                ('conam', 'median'),
+                ('conam', 'var'),
+                ('conam', 'sum'),
+            ]),
+        (["cano","locdt","mchno"], [
+                ('conam', 'count'),
+                ('conam', 'min'),
+                ('conam', 'max'),
+                ('conam', 'mean'),
+                ('conam', 'median'),
+                ('conam', 'var'),
+                ('conam', 'sum'),
+            ]),
+        (["cano","locdt","stocn","scity"], [
                 ('conam', 'count'),
                 ('conam', 'min'),
                 ('conam', 'max'),
@@ -573,6 +937,25 @@ class Configs:
     'min_iterm_BY_mchno', 'sum_iterm_BY_stocn', 'sum_iterm_BY_stscd', 'min_conam_BY_bacno_cano', 
     'max_iterm_BY_bacno_cano', 'var_iterm_BY_stscd',
 
+    'count_conam_BY_cano_day_hr_min_sec', 'var_conam_BY_contp', 
+    'min_conam_BY_cano_day_hr_min_sec', 'max_iterm_BY_loctm_hour_of_day',
+
+    'mean_conam_BY_bacno_scity_day_hr_min_sec', 'median_conam_BY_bacno_scity_day_hr_min_sec', 
+    'median_conam_BY_bacno_acqic_day_hr_min_sec', 'mean_conam_BY_cano_day_hr_min_sec', 
+    'mean_conam_BY_bacno_acqic_day_hr_min_sec', 'count_conam_BY_bacno_acqic_day_hr_min_sec', 
+    'count_conam_BY_acqic_day_hr_min_sec', 'mean_conam_BY_bacno_stocn_day_hr_min_sec',
+
+
+    'max_conam_BY_cano_day_hr_min_sec', 'max_conam_BY_contp', 
+    'mean_conam_BY_mchno_day_hr_min_sec', 'count_conam_BY_bacno_cano', 
+    'count_conam_BY_scity_day_hr_min_sec', 'min_conam_BY_contp_locdt',
+    'min_conam_BY_etymd', 'median_iterm_BY_etymd', 'median_iterm_BY_cano', 
+    'min_iterm_BY_cano', 'min_iterm_BY_etymd', 'count_conam_BY_stscd', 
+    'median_conam_BY_contp', 'sum_conam_BY_contp', 'max_iterm_BY_contp', 
+    'sum_conam_BY_etymd', 'count_conam_BY_contp', 'mean_conam_BY_contp', 
+    'count_conam_BY_bacno_stocn_day_hr_min_sec', 
+    'var_conam_BY_cano_day_hr_min_sec', 'max_iterm_BY_mchno', 'max_iterm_BY_etymd', 
+    'var_iterm_BY_stocn',
      # 'sum_time_elapsed_between_last_transactions_BY_bacno_cano', 'sum_iterm_BY_contp', 'max_iterm_BY_acqic',
      # 'mean_iterm_BY_contp', 'mean_iterm_BY_csmcu', 'max_iterm_BY_contp', 
      # 'mean_time_elapsed_between_last_transactions_BY_bacno_cano', 
