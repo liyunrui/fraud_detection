@@ -124,7 +124,7 @@ def main(args):
         df = pd.read_csv("../features/bacno_latent_features_w_cano.csv")
         df_train = df_train.merge(df, on = "bacno", how = "left")
         df_test = df_test.merge(df, on = "bacno", how = "left")
-        df = pd.read_csv("../features/cano_latent_features.csv")
+        df = pd.read_csv("../features/bacno_cano_latent_features.csv")
         df_train = df_train.merge(df, on = "cano", how = "left")
         df_test = df_test.merge(df, on = "cano", how = "left")
 
@@ -159,7 +159,7 @@ def main(args):
         df = pd.read_csv("../features/bacno_latent_features_w_mchno.csv")
         df_train = df_train.merge(df, on = "bacno", how = "left")
         df_test = df_test.merge(df, on = "bacno", how = "left")
-        df = pd.read_csv("../features/mchno_latent_features.csv")
+        df = pd.read_csv("../features/bacno_mchno_latent_features.csv")
         df_train = df_train.merge(df, on = "mchno", how = "left")
         df_test = df_test.merge(df, on = "mchno", how = "left")
 
@@ -226,6 +226,25 @@ def main(args):
         logger.info("Train application df shape: {}".format(df_train.shape))
         logger.info("Test application df shape: {}".format(df_test.shape))
 
+    with timer("Add conam-related feature v4"):
+        df_train, df_test = group_target_by_cols(
+            df_train, 
+            df_test, 
+            Configs.CONAM_AGG_RECIPE_4,
+            )
+        logger.info("Train application df shape: {}".format(df_train.shape))
+        logger.info("Test application df shape: {}".format(df_test.shape))
+
+    with timer("Add cano/mchno latent feature"):
+        df = pd.read_csv("../features/cano_latent_features_w_mchno.csv")
+        df_train = df_train.merge(df, on = "cano", how = "left")
+        df_test = df_test.merge(df, on = "cano", how = "left")
+        df = pd.read_csv("../features/cano_mchno_latent_features.csv")
+        df_train = df_train.merge(df, on = "mchno", how = "left")
+        df_test = df_test.merge(df, on = "mchno", how = "left")
+
+        logger.info("Train application df shape: {}".format(df_train.shape))
+        logger.info("Test application df shape: {}".format(df_test.shape))
 
     # with timer("Add elapsed time feature"):
     #     df = pd.concat([df_train, df_test], axis = 0)

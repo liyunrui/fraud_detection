@@ -255,15 +255,12 @@ def kfold_lightgbm(df_train, df_test, num_folds, args, logger, stratified = Fals
                 n_jobs = 3,
                 # nthread=int(multiprocessing.cpu_count()*args.CPU_USE_RATE),
                 n_estimators=10000,
-                learning_rate=0.02,
-                num_leaves=127,
-                max_depth=args.MAX_DEPTH,
                 random_state=seed,
                 scale_pos_weight=args.SCALE_POS_WEIGHT
                 )
         else:
             clf = lgb.LGBMClassifier(
-                n_jobs = 17,
+                n_jobs = -1,
                 n_estimators=10000,
                 learning_rate=0.02, # 0.02
                 num_leaves=args.NUM_LEAVES,
@@ -281,13 +278,23 @@ def kfold_lightgbm(df_train, df_test, num_folds, args, logger, stratified = Fals
                 random_state=seed,
                 scale_pos_weight=args.SCALE_POS_WEIGHT
                 )
-        clf.fit(train_x, 
-                train_y, 
-                eval_set=[(train_x, train_y), (valid_x, valid_y)], 
-                eval_metric= lgb_f1_score, 
-                verbose= False, 
-                early_stopping_rounds= 100, 
-                categorical_feature='auto') # early_stopping_rounds= 200
+
+        if args.TEST_NULL_HYPO:
+            clf.fit(train_x, 
+                    train_y, 
+                    eval_set=[(train_x, train_y), (valid_x, valid_y)], 
+                    eval_metric= "auc", 
+                    verbose= True, 
+                    early_stopping_rounds= 100, 
+                    categorical_feature='auto') # early_stopping_rounds= 200
+        else:
+            clf.fit(train_x, 
+                    train_y, 
+                    eval_set=[(train_x, train_y), (valid_x, valid_y)], 
+                    eval_metric= lgb_f1_score, 
+                    verbose= False, 
+                    early_stopping_rounds= 100, 
+                    categorical_feature='auto') # early_stopping_rounds= 200
         # probabilty belong to class1(fraud)
         oof_preds[valid_idx] = clf.predict_proba(valid_x, num_iteration=clf.best_iteration_)[:, 1]
         #train_preds[train_idx] += clf.predict_proba(train_x, num_iteration=clf.best_iteration_)[:, 1] / folds.n_splits
