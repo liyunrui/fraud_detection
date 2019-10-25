@@ -42,6 +42,7 @@ def s_to_time_format(s):
     datetime_str = "{}:{}:{}".format(H,M,S)
     assert datetime_str == "00:58:33", "It should be the same"
  
+
     """
     s = string_padding(s)
     S, M, H = s[-2:], s[-4:-2], s[:-4]
@@ -263,7 +264,7 @@ def kfold_lightgbm(df_train, df_test, num_folds, args, logger, stratified = Fals
                 n_jobs = -1,
                 n_estimators=10000,
                 learning_rate=0.02, # 0.02
-                num_leaves=args.NUM_LEAVES,
+                num_leaves=int(args.NUM_LEAVES),
                 colsample_bytree=args.COLSAMPLE_BYTREE,
                 subsample=args.SUBSAMPLE,
                 subsample_freq=args.SUBSAMPLE_FREQ,

@@ -246,6 +246,65 @@ def main(args):
         logger.info("Train application df shape: {}".format(df_train.shape))
         logger.info("Test application df shape: {}".format(df_test.shape))
 
+    with timer("Add cano/locdt latent feature"):
+        df = pd.read_csv("../features/cano_latent_features_w_locdt.csv")
+        df_train = df_train.merge(df, on = "cano", how = "left")
+        df_test = df_test.merge(df, on = "cano", how = "left")
+        df = pd.read_csv("../features/cano_locdt_latent_features.csv")
+        df_train = df_train.merge(df, on = "locdt", how = "left")
+        df_test = df_test.merge(df, on = "locdt", how = "left")
+
+        logger.info("Train application df shape: {}".format(df_train.shape))
+        logger.info("Test application df shape: {}".format(df_test.shape))
+
+    with timer("Add mchno/locdt latent feature"):
+        df = pd.read_csv("../features/mchno_latent_features_w_locdt.csv")
+        df_train = df_train.merge(df, on = "mchno", how = "left")
+        df_test = df_test.merge(df, on = "mchno", how = "left")
+        df = pd.read_csv("../features/mchno_locdt_latent_features.csv")
+        df_train = df_train.merge(df, on = "locdt", how = "left")
+        df_test = df_test.merge(df, on = "locdt", how = "left")
+
+        logger.info("Train application df shape: {}".format(df_train.shape))
+        logger.info("Test application df shape: {}".format(df_test.shape))
+
+    with timer("Add DAGMM latent feature"):
+        df_train["cano_locdt_index"] = ["{}_{}".format(str(i),str(j)) for i,j in zip(df_train.cano,df_train.locdt)]
+        df_test["cano_locdt_index"] = ["{}_{}".format(str(i),str(j)) for i,j in zip(df_test.cano,df_test.locdt)]
+
+        df = pd.read_csv("../features/DAGMM_features_2.csv")
+        df_train = df_train.merge(df, on = "cano_locdt_index", how = "left").drop_duplicates("txkey")
+        df_test = df_test.merge(df, on = "cano_locdt_index", how = "left").drop_duplicates("txkey")
+
+        logger.info("Train application df shape: {}".format(df_train.shape))
+        logger.info("Test application df shape: {}".format(df_test.shape))
+        del df
+        gc.collect()
+        
+    # with timer("Add bacno/locdt latent feature"):
+    #     df = pd.read_csv("../features/bacno_latent_features_w_locdt.csv")
+    #     df_train = df_train.merge(df, on = "bacno", how = "left")
+    #     df_test = df_test.merge(df, on = "bacno", how = "left")
+    #     df = pd.read_csv("../features/bacno_locdt_latent_features.csv")
+    #     df_train = df_train.merge(df, on = "locdt", how = "left")
+    #     df_test = df_test.merge(df, on = "locdt", how = "left")
+
+    #     logger.info("Train application df shape: {}".format(df_train.shape))
+    #     logger.info("Test application df shape: {}".format(df_test.shape))
+
+    # with timer("Add stocn/locdt latent feature"):
+    #     df = pd.read_csv("../features/stocn_latent_features_w_locdt.csv")
+    #     df_train = df_train.merge(df, on = "stocn", how = "left")
+    #     df_test = df_test.merge(df, on = "stocn", how = "left")
+    #     df = pd.read_csv("../features/stocn_locdt_latent_features.csv")
+    #     df_train = df_train.merge(df, on = "locdt", how = "left")
+    #     df_test = df_test.merge(df, on = "locdt", how = "left")
+
+    #     logger.info("Train application df shape: {}".format(df_train.shape))
+    #     logger.info("Test application df shape: {}".format(df_test.shape))
+
+
+
     # with timer("Add elapsed time feature"):
     #     df = pd.concat([df_train, df_test], axis = 0)
     #     df.sort_values(by = ["bacno","locdt"], inplace = True)
@@ -355,9 +414,7 @@ def main(args):
                 # drop unused features features_with_no_imp_at_least_twice
                 df.drop(Configs.FEATURE_USELESSNESS, axis=1, inplace=True, errors='ignore')
 
-                gc.collect()   
-            logger.info("Train application df shape: {}".format(df_train.shape))
-            logger.info("Test application df shape: {}".format(df_test.shape))
+                gc.collect()
 
         for df in [df_train, df_test]:
             df.drop(columns = ["loctm_hour_of_day",
@@ -365,9 +422,13 @@ def main(args):
                                "loctm_second_of_min",
                                "day_hr_min",
                                "day_hr_min_sec",
+                               "cano_locdt_index",
                                ], axis = 1, inplace = True)
-   
-        
+
+        logger.info("Train application df shape: {}".format(df_train.shape))
+        logger.info("Test application df shape: {}".format(df_test.shape))
+
+    
         ITERATION = (5 if args.TEST_NULL_HYPO else 1)
         feature_importance_df = pd.DataFrame()
         over_iterations_val_auc = np.zeros(ITERATION)

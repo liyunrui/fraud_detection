@@ -53,6 +53,29 @@ def feature_normalization_auto(df_train, df_test, mode = "train"):
     scaler = MinMaxScaler()
     df = pd.concat([df_train[feats], df_test[feats]], axis = 0)
 
+
+    for f in tqdm(feats):
+        data = df[f]
+        scaler.fit(data)
+        df_train[f] = scaler.transform(df_train[f])
+        df_test[f] = scaler.transform(df_test[f])
+    
+    return df_train, df_test
+
+def feature_normalization_auto_v2(df_train, df_test):
+    """
+    return two inputs of autoencoder, one is for train and another one is for test
+    """
+    from sklearn.preprocessing import MinMaxScaler, MaxAbsScaler
+    feats = ['acqic', 'bacno', 'cano', 'conam', 'contp', 'csmcu', 'ecfg', 'etymd',
+       'flbmk', 'flg_3dsmk', 'hcefg', 'insfg', 'iterm', 'locdt', 'mcc',
+       'mchno', 'ovrlt', 'scity', 'stocn', 'stscd', 'loctm_hour_of_day',
+       'loctm_minute_of_hour', 'loctm_second_of_min']
+    scaler = MinMaxScaler()
+    df = pd.concat([df_train[feats], df_test[feats]], axis = 0)
+
+
+
     data = df[feats]
     scaler.fit(data)
     
