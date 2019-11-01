@@ -1281,7 +1281,10 @@ class Configs:
     'iterm', 'var_conam_BY_ovrlt', 'mean_conam_BY_hcefg', 'mean_conam_BY_ovrlt', 
     'median_conam_BY_ovrlt', 'median_conam_BY_hcefg', 'mean_iterm_BY_contp', 
     'median_conam_BY_flbmk', 'var_conam_BY_hcefg', 'var_conam_BY_flbmk', 
-    'max_conam_BY_flbmk', 'sum_conam_BY_ovrlt'
+    'max_conam_BY_flbmk', 'sum_conam_BY_ovrlt',
+
+    # 10/29
+    "min_conam_BY_contp"
      # 'sum_time_elapsed_between_last_transactions_BY_bacno_cano', 'sum_iterm_BY_contp', 'max_iterm_BY_acqic',
      # 'mean_iterm_BY_contp', 'mean_iterm_BY_csmcu', 'max_iterm_BY_contp', 
      # 'mean_time_elapsed_between_last_transactions_BY_bacno_cano', 

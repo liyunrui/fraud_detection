@@ -4,6 +4,8 @@ train-lgb:
 		python main.py --train_file ../../dataset/train.csv --test_file ../../dataset/test.csv --result_path ../result/submission_lgb.csv 
 train-lgb-fs:
 		python main.py --train_file ../../dataset/train.csv --test_file ../../dataset/test.csv --result_path ../result/submission_lgb.csv --feature_selection True
+train-lgb-fs-lf:
+		python main.py --train_file ../../dataset/train.csv --test_file ../../dataset/test.csv --result_path ../result/submission_lgb.csv --feature_selection True --load_feature True
 train-lgb-fs-best:
 		python main.py --train_file ../../dataset/train.csv --test_file ../../dataset/test.csv --result_path ../result/submission_lgb.csv \
 		--feature_selection True --SUBSAMPLE 0.8890783754749252 --COLSAMPLE_BYTREE 0.9350060741234096 --MIN_CHILD_WEIGHT  39.245929638036316 \

@@ -5,12 +5,17 @@ from util import s_to_time_format, string_to_datetime,hour_to_range
 from tqdm import tqdm
 
 def value_to_count(df_train, df_test, df_train_normal_cano_id, df_):
+    """
+    convert categorial features into number of occurence in the dataset.
+    """
     # separate continuous feature and categorial features
     feats = ['acqic', 'bacno', 'cano', 'conam', 'contp', 'csmcu', 'ecfg', 'etymd',
        'flbmk', 'flg_3dsmk', 'hcefg', 'insfg', 'iterm', 'locdt',
        'mcc', 'mchno', 'ovrlt', 'scity', 'stocn', 'stscd', 'loctm_hour_of_day',
        'loctm_minute_of_hour', 'loctm_second_of_min'] 
-    cont_feats = ['iterm', 
+    cont_feats = [
+                  'conam',
+                  'iterm', 
                   'locdt',
                   'loctm_hour_of_day',
                   'loctm_minute_of_hour', 
@@ -108,9 +113,9 @@ if __name__ == '__main__':
                                                                                       )]
     df_test["cano_locdt_index"] = ["{}_{}_{}_{}_{}".format(str(i),str(j),str(k),str(l),str(m)) for i,j,k,l,m in zip(df_test.cano,
                                                                                       df_test.locdt,
-                                                                                      df_train.loctm_hour_of_day,
-                                                                                      df_train.loctm_minute_of_hour,
-                                                                                      df_train.loctm_second_of_min,
+                                                                                      df_test.loctm_hour_of_day,
+                                                                                      df_test.loctm_minute_of_hour,
+                                                                                      df_test.loctm_second_of_min,
                                                                                      )]
 
     df_train["cano_help"] = df_train.cano

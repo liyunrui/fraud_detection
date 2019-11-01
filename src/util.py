@@ -74,6 +74,15 @@ def hour_to_range(hr):
     else:
         return 'night'
 
+def num_transaction(df,target = "cano"):
+    tmp_cano_size = df.groupby(target).size().to_frame("{}_len".format(target)).reset_index()
+    df = df.merge(tmp_cano_size, on = target, how = "left")
+    return df
+
+def if_conam_zero(df):
+    df["if_conam_zero"] = [1 if int(i)==0 else 0 for i in df.conam]
+    return df
+
 def time_elapsed_between_last_transactions(df):
     if len(df) > 1:
         df.time_elapsed_between_last_transactions = [df.time_elapsed_between_last_transactions.iloc[0] for i in range(len(df))]

@@ -56,231 +56,389 @@ def timer(title):
     logger.info("{} - done in {:.0f}s".format(title, time.time() - t0))
     
 def main(args):
-    with timer("Process train/test application"):
-        #-------------------------
-        # load dataset
-        #-------------------------
-        df_train = pd.read_csv(args.train_file)
-        df_test = pd.read_csv(args.test_file)
+    if args.load_feature == True:
+        with timer("Load train/test features extracted"):
+            #-------------------------
+            # load dataset
+            #-------------------------
+            df_train = pd.read_csv("../features/train.csv")
+            df_test = pd.read_csv("../features/test.csv")
 
-        #-------------------------
-        # pre-processing
-        #-------------------------
-
-        for cat in Configs.CATEGORY:
-            df_train[cat] = df_train[cat].astype('category') #.cat.codes
-            df_test[cat] = df_test[cat].astype('category')
-            
-        for df in [df_train, df_test]:
+            #-------------------------
             # pre-processing
-            df["loctm_"] = df.loctm.astype(int).astype(str)
-            df.loctm_ = df.loctm_.apply(s_to_time_format).apply(string_to_datetime)
-            # # time-related feature
-            df["loctm_hour_of_day"] = df.loctm_.apply(lambda x: x.hour).astype('category')
-            df["loctm_minute_of_hour"] = df.loctm_.apply(lambda x: x.minute)
-            df["loctm_second_of_min"] = df.loctm_.apply(lambda x: x.second)
-            # df["loctm_absolute_time"] = [h*60+m for h,m in zip(df.loctm_hour_of_day,df.loctm_minute_of_hour)]
-            df["hour_range"] = df.loctm_.apply(lambda x: hour_to_range(x.hour)).astype("category")
-            # removed the columns no need
-            df.drop(columns = ["loctm_"], axis = 1, inplace = True)
-            # auxiliary fields
-            df["day_hr_min"] = ["{}:{}:{}".format(i,j,k) for i,j,k in zip(df.locdt,df.loctm_hour_of_day,df.loctm_minute_of_hour)]
-            df["day_hr_min_sec"] = ["{}:{}:{}:{}".format(i,j,k,z) for i,j,k,z in zip(df.locdt,df.loctm_hour_of_day,df.loctm_minute_of_hour,df.loctm_second_of_min)]
+            #-------------------------
 
-        logger.info("Train application df shape: {}".format(df_train.shape))
-        logger.info("Test application df shape: {}".format(df_test.shape))
+            for cat in Configs.CATEGORY:
+                df_train[cat] = df_train[cat].astype('category') #.cat.codes
+                df_test[cat] = df_test[cat].astype('category')
+            for df in [df_train, df_test]:
+                df["hour_range"] = df["hour_range"].astype('category')
 
-    with timer("Add bacno/cano feature"):
-        df_train, df_test = group_target_by_cols(df_train, df_test, Configs.CONAM_AGG_RECIPE_1)
+            logger.info("Train application df shape: {}".format(df_train.shape))
+            logger.info("Test application df shape: {}".format(df_test.shape))     
 
-        logger.info("Train application df shape: {}".format(df_train.shape))
-        logger.info("Test application df shape: {}".format(df_test.shape))
+    else:
+        with timer("Process train/test application"):
+            #-------------------------
+            # load dataset
+            #-------------------------
+            df_train = pd.read_csv(args.train_file)
+            df_test = pd.read_csv(args.test_file)
 
-    with timer("Add iterm-related feature"):
-        df_train, df_test = group_target_by_cols(df_train, df_test, Configs.ITERM_AGG_RECIPE)
+            #-------------------------
+            # pre-processing
+            #-------------------------
 
-        logger.info("Train application df shape: {}".format(df_train.shape))
-        logger.info("Test application df shape: {}".format(df_test.shape))
+            for cat in Configs.CATEGORY:
+                df_train[cat] = df_train[cat].astype('category') #.cat.codes
+                df_test[cat] = df_test[cat].astype('category')
+                
+            for df in [df_train, df_test]:
+                # pre-processing
+                df["loctm_"] = df.loctm.astype(int).astype(str)
+                df.loctm_ = df.loctm_.apply(s_to_time_format).apply(string_to_datetime)
+                # # time-related feature
+                df["loctm_hour_of_day"] = df.loctm_.apply(lambda x: x.hour).astype('category')
+                df["loctm_minute_of_hour"] = df.loctm_.apply(lambda x: x.minute)
+                df["loctm_second_of_min"] = df.loctm_.apply(lambda x: x.second)
+                # df["loctm_absolute_time"] = [h*60+m for h,m in zip(df.loctm_hour_of_day,df.loctm_minute_of_hour)]
+                df["hour_range"] = df.loctm_.apply(lambda x: hour_to_range(x.hour)).astype("category")
+                # removed the columns no need
+                df.drop(columns = ["loctm_"], axis = 1, inplace = True)
+                # auxiliary fields
+                df["day_hr_min"] = ["{}:{}:{}".format(i,j,k) for i,j,k in zip(df.locdt,df.loctm_hour_of_day,df.loctm_minute_of_hour)]
+                df["day_hr_min_sec"] = ["{}:{}:{}:{}".format(i,j,k,z) for i,j,k,z in zip(df.locdt,df.loctm_hour_of_day,df.loctm_minute_of_hour,df.loctm_second_of_min)]
 
-    with timer("Add conam-related feature"):
-        df_train, df_test = group_target_by_cols(df_train, df_test, Configs.CONAM_AGG_RECIPE_2)
+            logger.info("Train application df shape: {}".format(df_train.shape))
+            logger.info("Test application df shape: {}".format(df_test.shape))
 
-        logger.info("Train application df shape: {}".format(df_train.shape))
-        logger.info("Test application df shape: {}".format(df_test.shape))
+        with timer("Add bacno/cano feature"):
+            df_train, df_test = group_target_by_cols(df_train, df_test, Configs.CONAM_AGG_RECIPE_1)
 
-    with timer("Add hour-related feature"):
-        df_train, df_test = group_target_by_cols(df_train, df_test, Configs.HOUR_AGG_RECIPE)
+            logger.info("Train application df shape: {}".format(df_train.shape))
+            logger.info("Test application df shape: {}".format(df_test.shape))
 
-        logger.info("Train application df shape: {}".format(df_train.shape))
-        logger.info("Test application df shape: {}".format(df_test.shape))
+        with timer("Add iterm-related feature"):
+            df_train, df_test = group_target_by_cols(df_train, df_test, Configs.ITERM_AGG_RECIPE)
 
-    with timer("Add cano/conam feature"):
-        df_train, df_test = group_target_by_cols(df_train, df_test, Configs.CANO_CONAM_COUNT_RECIPE)
+            logger.info("Train application df shape: {}".format(df_train.shape))
+            logger.info("Test application df shape: {}".format(df_test.shape))
 
-        logger.info("Train application df shape: {}".format(df_train.shape))
-        logger.info("Test application df shape: {}".format(df_test.shape))
+        with timer("Add conam-related feature"):
+            df_train, df_test = group_target_by_cols(df_train, df_test, Configs.CONAM_AGG_RECIPE_2)
 
-    with timer("Add cano/bacno latent feature"):
-        df = pd.read_csv("../features/bacno_latent_features_w_cano.csv")
+            logger.info("Train application df shape: {}".format(df_train.shape))
+            logger.info("Test application df shape: {}".format(df_test.shape))
+
+        with timer("Add hour-related feature"):
+            df_train, df_test = group_target_by_cols(df_train, df_test, Configs.HOUR_AGG_RECIPE)
+
+            logger.info("Train application df shape: {}".format(df_train.shape))
+            logger.info("Test application df shape: {}".format(df_test.shape))
+
+        with timer("Add cano/conam feature"):
+            df_train, df_test = group_target_by_cols(df_train, df_test, Configs.CANO_CONAM_COUNT_RECIPE)
+
+            logger.info("Train application df shape: {}".format(df_train.shape))
+            logger.info("Test application df shape: {}".format(df_test.shape))
+
+        with timer("Add cano/bacno latent feature"):
+            df = pd.read_csv("../features/bacno_latent_features_w_cano.csv")
+            df_train = df_train.merge(df, on = "bacno", how = "left")
+            df_test = df_test.merge(df, on = "bacno", how = "left")
+            df = pd.read_csv("../features/bacno_cano_latent_features.csv")
+            df_train = df_train.merge(df, on = "cano", how = "left")
+            df_test = df_test.merge(df, on = "cano", how = "left")
+
+            logger.info("Train application df shape: {}".format(df_train.shape))
+            logger.info("Test application df shape: {}".format(df_test.shape))
+
+        with timer("Add locdt-related feature"):
+            df_train, df_test = group_target_by_cols(df_train, df_test, Configs.LOCDT_CONAM_RECIPE)
+
+            logger.info("Train application df shape: {}".format(df_train.shape))
+            logger.info("Test application df shape: {}".format(df_test.shape))
+
+        with timer("Add mchno-related feature"):
+            df_train, df_test = group_target_by_cols(df_train, df_test, Configs.MCHNO_CONAM_RECIPE)
+
+            logger.info("Train application df shape: {}".format(df_train.shape))
+            logger.info("Test application df shape: {}".format(df_test.shape))
+
+        with timer("Add scity-related feature"):
+            df_train, df_test = group_target_by_cols(df_train, df_test, Configs.SCITY_CONAM_RECIPE)
+
+            logger.info("Train application df shape: {}".format(df_train.shape))
+            logger.info("Test application df shape: {}".format(df_test.shape))
+
+        with timer("Add stocn-related feature"):
+            df_train, df_test = group_target_by_cols(df_train, df_test, Configs.STOCN_CONAM_RECIPE)
+
+            logger.info("Train application df shape: {}".format(df_train.shape))
+            logger.info("Test application df shape: {}".format(df_test.shape))
+
+        with timer("Add mchno/bacno latent feature"):
+            df = pd.read_csv("../features/bacno_latent_features_w_mchno.csv")
+            df_train = df_train.merge(df, on = "bacno", how = "left")
+            df_test = df_test.merge(df, on = "bacno", how = "left")
+            df = pd.read_csv("../features/bacno_mchno_latent_features.csv")
+            df_train = df_train.merge(df, on = "mchno", how = "left")
+            df_test = df_test.merge(df, on = "mchno", how = "left")
+
+            logger.info("Train application df shape: {}".format(df_train.shape))
+            logger.info("Test application df shape: {}".format(df_test.shape))
+
+        with timer("Add time second-level feature on bacno"):
+            df_train, df_test = group_target_by_cols(
+                df_train, 
+                df_test, 
+                Configs.HOUR_AGG_SEC_LEVEL_RECIPE_BACNO,
+                )
+            logger.info("Train application df shape: {}".format(df_train.shape))
+            logger.info("Test application df shape: {}".format(df_test.shape))
+
+        with timer("Add time second-level feature on cano"):
+            df_train, df_test = group_target_by_cols(
+                df_train, 
+                df_test, 
+                Configs.HOUR_AGG_SEC_LEVEL_RECIPE_CANO,
+                )
+            logger.info("Train application df shape: {}".format(df_train.shape))
+            logger.info("Test application df shape: {}".format(df_test.shape))
+
+        with timer("Add time second-level feature on mchno"):
+            df_train, df_test = group_target_by_cols(
+                df_train, 
+                df_test, 
+                Configs.HOUR_AGG_SEC_LEVEL_RECIPE_MCHNO,
+                )
+            logger.info("Train application df shape: {}".format(df_train.shape))
+            logger.info("Test application df shape: {}".format(df_test.shape))
+
+        with timer("Add time second-level feature on csmcu/stocn/scity"):
+            df_train, df_test = group_target_by_cols(
+                df_train, 
+                df_test, 
+                Configs.HOUR_AGG_SEC_LEVEL_RECIPE,
+                )
+            logger.info("Train application df shape: {}".format(df_train.shape))
+            logger.info("Test application df shape: {}".format(df_test.shape))
+
+        with timer("Add time second-level feature on acqic/csmcu/stocn/scity"):
+            df_train, df_test = group_target_by_cols(
+                df_train, 
+                df_test, 
+                Configs.HOUR_AGG_SEC_LEVEL_RECIPE_2,
+                )
+            logger.info("Train application df shape: {}".format(df_train.shape))
+            logger.info("Test application df shape: {}".format(df_test.shape))
+
+        with timer("Add conam-related feature v3"):
+            df_train, df_test = group_target_by_cols(
+                df_train, 
+                df_test, 
+                Configs.CONAM_AGG_RECIPE_3,
+                )
+            logger.info("Train application df shape: {}".format(df_train.shape))
+            logger.info("Test application df shape: {}".format(df_test.shape))
+
+        with timer("Add locdt-related feature v2"):
+            df_train, df_test = group_target_by_cols(df_train, df_test, Configs.LOCDT_CONAM_RECIPE_2)
+
+            logger.info("Train application df shape: {}".format(df_train.shape))
+            logger.info("Test application df shape: {}".format(df_test.shape))
+
+        with timer("Add conam-related feature v4"):
+            df_train, df_test = group_target_by_cols(
+                df_train, 
+                df_test, 
+                Configs.CONAM_AGG_RECIPE_4,
+                )
+            logger.info("Train application df shape: {}".format(df_train.shape))
+            logger.info("Test application df shape: {}".format(df_test.shape))
+
+        with timer("Add cano/mchno latent feature"):
+            df = pd.read_csv("../features/cano_latent_features_w_mchno.csv")
+            df_train = df_train.merge(df, on = "cano", how = "left")
+            df_test = df_test.merge(df, on = "cano", how = "left")
+            df = pd.read_csv("../features/cano_mchno_latent_features.csv")
+            df_train = df_train.merge(df, on = "mchno", how = "left")
+            df_test = df_test.merge(df, on = "mchno", how = "left")
+
+            logger.info("Train application df shape: {}".format(df_train.shape))
+            logger.info("Test application df shape: {}".format(df_test.shape))
+
+        with timer("Add cano/locdt latent feature"):
+            df = pd.read_csv("../features/cano_latent_features_w_locdt.csv")
+            df_train = df_train.merge(df, on = "cano", how = "left")
+            df_test = df_test.merge(df, on = "cano", how = "left")
+            df = pd.read_csv("../features/cano_locdt_latent_features.csv")
+            df_train = df_train.merge(df, on = "locdt", how = "left")
+            df_test = df_test.merge(df, on = "locdt", how = "left")
+
+            logger.info("Train application df shape: {}".format(df_train.shape))
+            logger.info("Test application df shape: {}".format(df_test.shape))
+
+        with timer("Add mchno/locdt latent feature"):
+            df = pd.read_csv("../features/mchno_latent_features_w_locdt.csv")
+            df_train = df_train.merge(df, on = "mchno", how = "left")
+            df_test = df_test.merge(df, on = "mchno", how = "left")
+            df = pd.read_csv("../features/mchno_locdt_latent_features.csv")
+            df_train = df_train.merge(df, on = "locdt", how = "left")
+            df_test = df_test.merge(df, on = "locdt", how = "left")
+
+            logger.info("Train application df shape: {}".format(df_train.shape))
+            logger.info("Test application df shape: {}".format(df_test.shape))
+
+        with timer("Add mchno time aggregate average feature"):
+            # df = pd.read_csv("../features/average_mchno_time_agg.csv")
+            # df_train = df_train.merge(df, on = "txkey", how = "left")
+            # df_test = df_test.merge(df, on = "txkey", how = "left")
+            df = pd.read_csv("../features/average_mchno_mean_conam_in_past_7_days.csv").iloc[:,1:]
+            df_train = df_train.merge(df, on = "mchno", how = "left")
+            df_test = df_test.merge(df, on = "mchno", how = "left")
+
+            df = pd.read_csv("../features/average_mchno_mean_conam_in_past_14_days.csv").iloc[:,1:]
+            df_train = df_train.merge(df, on = "mchno", how = "left")
+            df_test = df_test.merge(df, on = "mchno", how = "left")
+
+            df = pd.read_csv("../features/average_mchno_std_conam_in_past_7_days.csv").iloc[:,1:]
+            df_train = df_train.merge(df, on = "mchno", how = "left")
+            df_test = df_test.merge(df, on = "mchno", how = "left")
+
+            df = pd.read_csv("../features/average_mchno_std_conam_in_past_14_days.csv").iloc[:,1:]
+            df_train = df_train.merge(df, on = "mchno", how = "left")
+            df_test = df_test.merge(df, on = "mchno", how = "left")
+
+            df = pd.read_csv("../features/average_mchno_min_conam_in_past_7_days.csv").iloc[:,1:]
+            df_train = df_train.merge(df, on = "mchno", how = "left")
+            df_test = df_test.merge(df, on = "mchno", how = "left")
+
+            df = pd.read_csv("../features/average_mchno_min_conam_in_past_14_days.csv").iloc[:,1:]
+            df_train = df_train.merge(df, on = "mchno", how = "left")
+            df_test = df_test.merge(df, on = "mchno", how = "left")
+
+            df = pd.read_csv("../features/average_mchno_max_conam_in_past_7_days.csv").iloc[:,1:]
+            df_train = df_train.merge(df, on = "mchno", how = "left")
+            df_test = df_test.merge(df, on = "mchno", how = "left")
+
+            df = pd.read_csv("../features/average_mchno_max_conam_in_past_14_days.csv").iloc[:,1:]
+            df_train = df_train.merge(df, on = "mchno", how = "left")
+            df_test = df_test.merge(df, on = "mchno", how = "left")
+
+            df = pd.read_csv("../features/average_mchno_median_conam_in_past_7_days.csv").iloc[:,1:]
+            df_train = df_train.merge(df, on = "mchno", how = "left")
+            df_test = df_test.merge(df, on = "mchno", how = "left")
+
+            df = pd.read_csv("../features/average_mchno_median_conam_in_past_14_days.csv").iloc[:,1:]
+            df_train = df_train.merge(df, on = "mchno", how = "left")
+            df_test = df_test.merge(df, on = "mchno", how = "left")
+
+            logger.info("Train application df shape: {}".format(df_train.shape))
+            logger.info("Test application df shape: {}".format(df_test.shape))
+
+    with timer("Add bacno time aggregate average feature"):
+        df = pd.read_csv("../features/average_bacno_min_conam_in_past_7_days.csv").iloc[:,1:]
         df_train = df_train.merge(df, on = "bacno", how = "left")
         df_test = df_test.merge(df, on = "bacno", how = "left")
-        df = pd.read_csv("../features/bacno_cano_latent_features.csv")
-        df_train = df_train.merge(df, on = "cano", how = "left")
-        df_test = df_test.merge(df, on = "cano", how = "left")
 
-        logger.info("Train application df shape: {}".format(df_train.shape))
-        logger.info("Test application df shape: {}".format(df_test.shape))
-
-    with timer("Add locdt-related feature"):
-        df_train, df_test = group_target_by_cols(df_train, df_test, Configs.LOCDT_CONAM_RECIPE)
-
-        logger.info("Train application df shape: {}".format(df_train.shape))
-        logger.info("Test application df shape: {}".format(df_test.shape))
-
-    with timer("Add mchno-related feature"):
-        df_train, df_test = group_target_by_cols(df_train, df_test, Configs.MCHNO_CONAM_RECIPE)
-
-        logger.info("Train application df shape: {}".format(df_train.shape))
-        logger.info("Test application df shape: {}".format(df_test.shape))
-
-    with timer("Add scity-related feature"):
-        df_train, df_test = group_target_by_cols(df_train, df_test, Configs.SCITY_CONAM_RECIPE)
-
-        logger.info("Train application df shape: {}".format(df_train.shape))
-        logger.info("Test application df shape: {}".format(df_test.shape))
-
-    with timer("Add stocn-related feature"):
-        df_train, df_test = group_target_by_cols(df_train, df_test, Configs.STOCN_CONAM_RECIPE)
-
-        logger.info("Train application df shape: {}".format(df_train.shape))
-        logger.info("Test application df shape: {}".format(df_test.shape))
-
-    with timer("Add mchno/bacno latent feature"):
-        df = pd.read_csv("../features/bacno_latent_features_w_mchno.csv")
+        df = pd.read_csv("../features/average_bacno_max_conam_in_past_7_days.csv").iloc[:,1:]
         df_train = df_train.merge(df, on = "bacno", how = "left")
         df_test = df_test.merge(df, on = "bacno", how = "left")
-        df = pd.read_csv("../features/bacno_mchno_latent_features.csv")
-        df_train = df_train.merge(df, on = "mchno", how = "left")
-        df_test = df_test.merge(df, on = "mchno", how = "left")
+
+        df = pd.read_csv("../features/average_bacno_mean_conam_in_past_7_days.csv").iloc[:,1:]
+        df_train = df_train.merge(df, on = "bacno", how = "left")
+        df_test = df_test.merge(df, on = "bacno", how = "left")
+
+        df = pd.read_csv("../features/average_bacno_median_conam_in_past_7_days.csv").iloc[:,1:]
+        df_train = df_train.merge(df, on = "bacno", how = "left")
+        df_test = df_test.merge(df, on = "bacno", how = "left")
+
+        df = pd.read_csv("../features/average_bacno_std_conam_in_past_7_days.csv").iloc[:,1:]
+        df_train = df_train.merge(df, on = "bacno", how = "left")
+        df_test = df_test.merge(df, on = "bacno", how = "left")
+
+        df = pd.read_csv("../features/average_bacno_min_conam_in_past_14_days.csv").iloc[:,1:]
+        df_train = df_train.merge(df, on = "bacno", how = "left")
+        df_test = df_test.merge(df, on = "bacno", how = "left")
+
+        df = pd.read_csv("../features/average_bacno_max_conam_in_past_14_days.csv").iloc[:,1:]
+        df_train = df_train.merge(df, on = "bacno", how = "left")
+        df_test = df_test.merge(df, on = "bacno", how = "left")
+
+        df = pd.read_csv("../features/average_bacno_mean_conam_in_past_14_days.csv").iloc[:,1:]
+        df_train = df_train.merge(df, on = "bacno", how = "left")
+        df_test = df_test.merge(df, on = "bacno", how = "left")
+
+        df = pd.read_csv("../features/average_bacno_median_conam_in_past_14_days.csv").iloc[:,1:]
+        df_train = df_train.merge(df, on = "bacno", how = "left")
+        df_test = df_test.merge(df, on = "bacno", how = "left")
+
+        df = pd.read_csv("../features/average_bacno_std_conam_in_past_14_days.csv").iloc[:,1:]
+        df_train = df_train.merge(df, on = "bacno", how = "left")
+        df_test = df_test.merge(df, on = "bacno", how = "left")
 
         logger.info("Train application df shape: {}".format(df_train.shape))
         logger.info("Test application df shape: {}".format(df_test.shape))
 
-    with timer("Add time second-level feature on bacno"):
-        df_train, df_test = group_target_by_cols(
-            df_train, 
-            df_test, 
-            Configs.HOUR_AGG_SEC_LEVEL_RECIPE_BACNO,
-            )
-        logger.info("Train application df shape: {}".format(df_train.shape))
-        logger.info("Test application df shape: {}".format(df_test.shape))
+    with timer("Add mcc time aggregate average feature"):
+        df = pd.read_csv("../features/average_mcc_median_conam_in_past_7_days.csv").iloc[:,1:]
+        df_train = df_train.merge(df, on = "mcc", how = "left")
+        df_test = df_test.merge(df, on = "bacno", how = "left")
 
-    with timer("Add time second-level feature on cano"):
-        df_train, df_test = group_target_by_cols(
-            df_train, 
-            df_test, 
-            Configs.HOUR_AGG_SEC_LEVEL_RECIPE_CANO,
-            )
-        logger.info("Train application df shape: {}".format(df_train.shape))
-        logger.info("Test application df shape: {}".format(df_test.shape))
+        df = pd.read_csv("../features/average_mcc_max_conam_in_past_7_days.csv").iloc[:,1:]
+        df_train = df_train.merge(df, on = "mcc", how = "left")
+        df_test = df_test.merge(df, on = "bacno", how = "left")
 
-    with timer("Add time second-level feature on mchno"):
-        df_train, df_test = group_target_by_cols(
-            df_train, 
-            df_test, 
-            Configs.HOUR_AGG_SEC_LEVEL_RECIPE_MCHNO,
-            )
-        logger.info("Train application df shape: {}".format(df_train.shape))
-        logger.info("Test application df shape: {}".format(df_test.shape))
+        df = pd.read_csv("../features/average_mcc_min_conam_in_past_7_days.csv").iloc[:,1:]
+        df_train = df_train.merge(df, on = "mcc", how = "left")
+        df_test = df_test.merge(df, on = "bacno", how = "left")
 
-    with timer("Add time second-level feature on csmcu/stocn/scity"):
-        df_train, df_test = group_target_by_cols(
-            df_train, 
-            df_test, 
-            Configs.HOUR_AGG_SEC_LEVEL_RECIPE,
-            )
-        logger.info("Train application df shape: {}".format(df_train.shape))
-        logger.info("Test application df shape: {}".format(df_test.shape))
+        df = pd.read_csv("../features/average_mcc_mean_conam_in_past_7_days.csv").iloc[:,1:]
+        df_train = df_train.merge(df, on = "mcc", how = "left")
+        df_test = df_test.merge(df, on = "bacno", how = "left")
 
-    with timer("Add time second-level feature on acqic/csmcu/stocn/scity"):
-        df_train, df_test = group_target_by_cols(
-            df_train, 
-            df_test, 
-            Configs.HOUR_AGG_SEC_LEVEL_RECIPE_2,
-            )
-        logger.info("Train application df shape: {}".format(df_train.shape))
-        logger.info("Test application df shape: {}".format(df_test.shape))
+        df = pd.read_csv("../features/average_mcc_std_conam_in_past_7_days.csv").iloc[:,1:]
+        df_train = df_train.merge(df, on = "mcc", how = "left")
+        df_test = df_test.merge(df, on = "bacno", how = "left")
 
-    with timer("Add conam-related feature v3"):
-        df_train, df_test = group_target_by_cols(
-            df_train, 
-            df_test, 
-            Configs.CONAM_AGG_RECIPE_3,
-            )
-        logger.info("Train application df shape: {}".format(df_train.shape))
-        logger.info("Test application df shape: {}".format(df_test.shape))
 
-    with timer("Add locdt-related feature v2"):
-        df_train, df_test = group_target_by_cols(df_train, df_test, Configs.LOCDT_CONAM_RECIPE_2)
+    # with timer("Add cano/bacno ratio feature"):
+    #     from util import num_transaction
 
-        logger.info("Train application df shape: {}".format(df_train.shape))
-        logger.info("Test application df shape: {}".format(df_test.shape))
+    #     df_train = num_transaction(df_train,target = "cano")
+    #     df_test = num_transaction(df_test,target = "cano")
+    #     df_train = num_transaction(df_train,target = "bacno")
+    #     df_test = num_transaction(df_test,target = "bacno")
 
-    with timer("Add conam-related feature v4"):
-        df_train, df_test = group_target_by_cols(
-            df_train, 
-            df_test, 
-            Configs.CONAM_AGG_RECIPE_4,
-            )
-        logger.info("Train application df shape: {}".format(df_train.shape))
-        logger.info("Test application df shape: {}".format(df_test.shape))
+    #     df_train["cano_ratio"] = df_train["cano_len"] / df_train["bacno_len"]
+    #     df_test["cano_ratio"] = df_test["cano_len"] / df_test["bacno_len"]
 
-    with timer("Add cano/mchno latent feature"):
-        df = pd.read_csv("../features/cano_latent_features_w_mchno.csv")
-        df_train = df_train.merge(df, on = "cano", how = "left")
-        df_test = df_test.merge(df, on = "cano", how = "left")
-        df = pd.read_csv("../features/cano_mchno_latent_features.csv")
-        df_train = df_train.merge(df, on = "mchno", how = "left")
-        df_test = df_test.merge(df, on = "mchno", how = "left")
+    #     logger.info("Train application df shape: {}".format(df_train.shape))
+    #     logger.info("Test application df shape: {}".format(df_test.shape))
 
-        logger.info("Train application df shape: {}".format(df_train.shape))
-        logger.info("Test application df shape: {}".format(df_test.shape))
+    # with timer("Add if_conam_zero feature"):
+    #     from util import if_conam_zero
 
-    with timer("Add cano/locdt latent feature"):
-        df = pd.read_csv("../features/cano_latent_features_w_locdt.csv")
-        df_train = df_train.merge(df, on = "cano", how = "left")
-        df_test = df_test.merge(df, on = "cano", how = "left")
-        df = pd.read_csv("../features/cano_locdt_latent_features.csv")
-        df_train = df_train.merge(df, on = "locdt", how = "left")
-        df_test = df_test.merge(df, on = "locdt", how = "left")
+    #     df_train = if_conam_zero(df_train)
+    #     df_test = if_conam_zero(df_test)
 
-        logger.info("Train application df shape: {}".format(df_train.shape))
-        logger.info("Test application df shape: {}".format(df_test.shape))
+    #     logger.info("Train application df shape: {}".format(df_train.shape))
+    #     logger.info("Test application df shape: {}".format(df_test.shape))
 
-    with timer("Add mchno/locdt latent feature"):
-        df = pd.read_csv("../features/mchno_latent_features_w_locdt.csv")
-        df_train = df_train.merge(df, on = "mchno", how = "left")
-        df_test = df_test.merge(df, on = "mchno", how = "left")
-        df = pd.read_csv("../features/mchno_locdt_latent_features.csv")
-        df_train = df_train.merge(df, on = "locdt", how = "left")
-        df_test = df_test.merge(df, on = "locdt", how = "left")
+    # with timer("Add DAGMM latent feature"):
+    #     df_train["cano_locdt_index"] = ["{}_{}".format(str(i),str(j)) for i,j in zip(df_train.cano,df_train.locdt)]
+    #     df_test["cano_locdt_index"] = ["{}_{}".format(str(i),str(j)) for i,j in zip(df_test.cano,df_test.locdt)]
 
-        logger.info("Train application df shape: {}".format(df_train.shape))
-        logger.info("Test application df shape: {}".format(df_test.shape))
+    #     df = pd.read_csv("../features/DAGMM_features_less_input.csv")
+    #     df_train = df_train.merge(df, on = "cano_locdt_index", how = "left").drop_duplicates("txkey")
+    #     df_test = df_test.merge(df, on = "cano_locdt_index", how = "left").drop_duplicates("txkey")
 
-    with timer("Add DAGMM latent feature"):
-        df_train["cano_locdt_index"] = ["{}_{}".format(str(i),str(j)) for i,j in zip(df_train.cano,df_train.locdt)]
-        df_test["cano_locdt_index"] = ["{}_{}".format(str(i),str(j)) for i,j in zip(df_test.cano,df_test.locdt)]
+    #     logger.info("Train application df shape: {}".format(df_train.shape))
+    #     logger.info("Test application df shape: {}".format(df_test.shape))
+    #     del df
+    #     gc.collect()
 
-        df = pd.read_csv("../features/DAGMM_features_2.csv")
-        df_train = df_train.merge(df, on = "cano_locdt_index", how = "left").drop_duplicates("txkey")
-        df_test = df_test.merge(df, on = "cano_locdt_index", how = "left").drop_duplicates("txkey")
-
-        logger.info("Train application df shape: {}".format(df_train.shape))
-        logger.info("Test application df shape: {}".format(df_test.shape))
-        del df
-        gc.collect()
-        
     # with timer("Add bacno/locdt latent feature"):
     #     df = pd.read_csv("../features/bacno_latent_features_w_locdt.csv")
     #     df_train = df_train.merge(df, on = "bacno", how = "left")
@@ -423,7 +581,9 @@ def main(args):
                                "day_hr_min",
                                "day_hr_min_sec",
                                "cano_locdt_index",
-                               ], axis = 1, inplace = True)
+                               "cano_len",
+                               "bacno_len"
+                               ], axis = 1, inplace = True, errors = "ignore")
 
         logger.info("Train application df shape: {}".format(df_train.shape))
         logger.info("Test application df shape: {}".format(df_test.shape))
@@ -489,5 +649,7 @@ if __name__ == '__main__':
     parser.add_argument('--TEST_NULL_HYPO', default=False, type=bool, help='get random features by null hypothesis')
     parser.add_argument('--ensemble', default=True, type=bool, help='save testing results with predicted prob for ensemble')
     parser.add_argument('--model', default='lgb', type=str, help='lgb or xgb')
-
+    #
+    parser.add_argument('--load_feature', default='False', type=bool, help='determined if use the feature extracted already')
+    
     main(parser.parse_args())
