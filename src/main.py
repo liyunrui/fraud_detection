@@ -290,118 +290,241 @@ def main(args):
             logger.info("Train application df shape: {}".format(df_train.shape))
             logger.info("Test application df shape: {}".format(df_test.shape))
 
-        with timer("Add mchno time aggregate average feature"):
-            # df = pd.read_csv("../features/average_mchno_time_agg.csv")
-            # df_train = df_train.merge(df, on = "txkey", how = "left")
-            # df_test = df_test.merge(df, on = "txkey", how = "left")
-            df = pd.read_csv("../features/average_mchno_mean_conam_in_past_7_days.csv").iloc[:,1:]
-            df_train = df_train.merge(df, on = "mchno", how = "left")
-            df_test = df_test.merge(df, on = "mchno", how = "left")
+    with timer("Add mchno time aggregate average feature"):
+        # df = pd.read_csv("../features/average_mchno_time_agg.csv")
+        # df_train = df_train.merge(df, on = "txkey", how = "left")
+        # df_test = df_test.merge(df, on = "txkey", how = "left")
+        df = pd.read_csv("../features/average_mchno_mean_conam_in_past_7_days.csv")
+        df_train = df_train.merge(df, on = "mchno", how = "left")
+        df_test = df_test.merge(df, on = "mchno", how = "left")
 
-            df = pd.read_csv("../features/average_mchno_mean_conam_in_past_14_days.csv").iloc[:,1:]
-            df_train = df_train.merge(df, on = "mchno", how = "left")
-            df_test = df_test.merge(df, on = "mchno", how = "left")
+        df = pd.read_csv("../features/average_mchno_mean_conam_in_past_14_days.csv")
+        df_train = df_train.merge(df, on = "mchno", how = "left")
+        df_test = df_test.merge(df, on = "mchno", how = "left")
 
-            df = pd.read_csv("../features/average_mchno_std_conam_in_past_7_days.csv").iloc[:,1:]
-            df_train = df_train.merge(df, on = "mchno", how = "left")
-            df_test = df_test.merge(df, on = "mchno", how = "left")
+        # df = pd.read_csv("../features/average_mchno_std_conam_in_past_7_days.csv")
+        # df_train = df_train.merge(df, on = "mchno", how = "left")
+        # df_test = df_test.merge(df, on = "mchno", how = "left")
 
-            df = pd.read_csv("../features/average_mchno_std_conam_in_past_14_days.csv").iloc[:,1:]
-            df_train = df_train.merge(df, on = "mchno", how = "left")
-            df_test = df_test.merge(df, on = "mchno", how = "left")
+        # df = pd.read_csv("../features/average_mchno_std_conam_in_past_14_days.csv")
+        # df_train = df_train.merge(df, on = "mchno", how = "left")
+        # df_test = df_test.merge(df, on = "mchno", how = "left")
 
-            df = pd.read_csv("../features/average_mchno_min_conam_in_past_7_days.csv").iloc[:,1:]
-            df_train = df_train.merge(df, on = "mchno", how = "left")
-            df_test = df_test.merge(df, on = "mchno", how = "left")
+        # df = pd.read_csv("../features/average_mchno_min_conam_in_past_7_days.csv")
+        # df_train = df_train.merge(df, on = "mchno", how = "left")
+        # df_test = df_test.merge(df, on = "mchno", how = "left")
 
-            df = pd.read_csv("../features/average_mchno_min_conam_in_past_14_days.csv").iloc[:,1:]
-            df_train = df_train.merge(df, on = "mchno", how = "left")
-            df_test = df_test.merge(df, on = "mchno", how = "left")
+        # df = pd.read_csv("../features/average_mchno_min_conam_in_past_14_days.csv")
+        # df_train = df_train.merge(df, on = "mchno", how = "left")
+        # df_test = df_test.merge(df, on = "mchno", how = "left")
 
-            df = pd.read_csv("../features/average_mchno_max_conam_in_past_7_days.csv").iloc[:,1:]
-            df_train = df_train.merge(df, on = "mchno", how = "left")
-            df_test = df_test.merge(df, on = "mchno", how = "left")
+        # df = pd.read_csv("../features/average_mchno_max_conam_in_past_7_days.csv")
+        # df_train = df_train.merge(df, on = "mchno", how = "left")
+        # df_test = df_test.merge(df, on = "mchno", how = "left")
 
-            df = pd.read_csv("../features/average_mchno_max_conam_in_past_14_days.csv").iloc[:,1:]
-            df_train = df_train.merge(df, on = "mchno", how = "left")
-            df_test = df_test.merge(df, on = "mchno", how = "left")
+        # df = pd.read_csv("../features/average_mchno_max_conam_in_past_14_days.csv")
+        # df_train = df_train.merge(df, on = "mchno", how = "left")
+        # df_test = df_test.merge(df, on = "mchno", how = "left")
 
-            df = pd.read_csv("../features/average_mchno_median_conam_in_past_7_days.csv").iloc[:,1:]
-            df_train = df_train.merge(df, on = "mchno", how = "left")
-            df_test = df_test.merge(df, on = "mchno", how = "left")
+        # df = pd.read_csv("../features/average_mchno_median_conam_in_past_7_days.csv")
+        # df_train = df_train.merge(df, on = "mchno", how = "left")
+        # df_test = df_test.merge(df, on = "mchno", how = "left")
 
-            df = pd.read_csv("../features/average_mchno_median_conam_in_past_14_days.csv").iloc[:,1:]
-            df_train = df_train.merge(df, on = "mchno", how = "left")
-            df_test = df_test.merge(df, on = "mchno", how = "left")
+        # df = pd.read_csv("../features/average_mchno_median_conam_in_past_14_days.csv")
+        # df_train = df_train.merge(df, on = "mchno", how = "left")
+        # df_test = df_test.merge(df, on = "mchno", how = "left")
 
-            logger.info("Train application df shape: {}".format(df_train.shape))
-            logger.info("Test application df shape: {}".format(df_test.shape))
+        logger.info("Train application df shape: {}".format(df_train.shape))
+        logger.info("Test application df shape: {}".format(df_test.shape))
 
     with timer("Add bacno time aggregate average feature"):
-        df = pd.read_csv("../features/average_bacno_min_conam_in_past_7_days.csv").iloc[:,1:]
-        df_train = df_train.merge(df, on = "bacno", how = "left")
-        df_test = df_test.merge(df, on = "bacno", how = "left")
+        # df = pd.read_csv("../features/average_bacno_min_conam_in_past_7_days.csv").iloc[:,1:]
+        # df_train = df_train.merge(df, on = "bacno", how = "left")
+        # df_test = df_test.merge(df, on = "bacno", how = "left")
 
-        df = pd.read_csv("../features/average_bacno_max_conam_in_past_7_days.csv").iloc[:,1:]
-        df_train = df_train.merge(df, on = "bacno", how = "left")
-        df_test = df_test.merge(df, on = "bacno", how = "left")
+        # df = pd.read_csv("../features/average_bacno_max_conam_in_past_7_days.csv").iloc[:,1:]
+        # df_train = df_train.merge(df, on = "bacno", how = "left")
+        # df_test = df_test.merge(df, on = "bacno", how = "left")
 
         df = pd.read_csv("../features/average_bacno_mean_conam_in_past_7_days.csv").iloc[:,1:]
         df_train = df_train.merge(df, on = "bacno", how = "left")
         df_test = df_test.merge(df, on = "bacno", how = "left")
 
-        df = pd.read_csv("../features/average_bacno_median_conam_in_past_7_days.csv").iloc[:,1:]
-        df_train = df_train.merge(df, on = "bacno", how = "left")
-        df_test = df_test.merge(df, on = "bacno", how = "left")
+        # df = pd.read_csv("../features/average_bacno_median_conam_in_past_7_days.csv").iloc[:,1:]
+        # df_train = df_train.merge(df, on = "bacno", how = "left")
+        # df_test = df_test.merge(df, on = "bacno", how = "left")
 
-        df = pd.read_csv("../features/average_bacno_std_conam_in_past_7_days.csv").iloc[:,1:]
-        df_train = df_train.merge(df, on = "bacno", how = "left")
-        df_test = df_test.merge(df, on = "bacno", how = "left")
+        # df = pd.read_csv("../features/average_bacno_std_conam_in_past_7_days.csv").iloc[:,1:]
+        # df_train = df_train.merge(df, on = "bacno", how = "left")
+        # df_test = df_test.merge(df, on = "bacno", how = "left")
 
-        df = pd.read_csv("../features/average_bacno_min_conam_in_past_14_days.csv").iloc[:,1:]
-        df_train = df_train.merge(df, on = "bacno", how = "left")
-        df_test = df_test.merge(df, on = "bacno", how = "left")
+        # df = pd.read_csv("../features/average_bacno_min_conam_in_past_14_days.csv").iloc[:,1:]
+        # df_train = df_train.merge(df, on = "bacno", how = "left")
+        # df_test = df_test.merge(df, on = "bacno", how = "left")
 
-        df = pd.read_csv("../features/average_bacno_max_conam_in_past_14_days.csv").iloc[:,1:]
-        df_train = df_train.merge(df, on = "bacno", how = "left")
-        df_test = df_test.merge(df, on = "bacno", how = "left")
+        # df = pd.read_csv("../features/average_bacno_max_conam_in_past_14_days.csv").iloc[:,1:]
+        # df_train = df_train.merge(df, on = "bacno", how = "left")
+        # df_test = df_test.merge(df, on = "bacno", how = "left")
 
         df = pd.read_csv("../features/average_bacno_mean_conam_in_past_14_days.csv").iloc[:,1:]
         df_train = df_train.merge(df, on = "bacno", how = "left")
         df_test = df_test.merge(df, on = "bacno", how = "left")
 
-        df = pd.read_csv("../features/average_bacno_median_conam_in_past_14_days.csv").iloc[:,1:]
-        df_train = df_train.merge(df, on = "bacno", how = "left")
-        df_test = df_test.merge(df, on = "bacno", how = "left")
+        # df = pd.read_csv("../features/average_bacno_median_conam_in_past_14_days.csv").iloc[:,1:]
+        # df_train = df_train.merge(df, on = "bacno", how = "left")
+        # df_test = df_test.merge(df, on = "bacno", how = "left")
 
-        df = pd.read_csv("../features/average_bacno_std_conam_in_past_14_days.csv").iloc[:,1:]
-        df_train = df_train.merge(df, on = "bacno", how = "left")
-        df_test = df_test.merge(df, on = "bacno", how = "left")
+        # df = pd.read_csv("../features/average_bacno_std_conam_in_past_14_days.csv").iloc[:,1:]
+        # df_train = df_train.merge(df, on = "bacno", how = "left")
+        # df_test = df_test.merge(df, on = "bacno", how = "left")
 
         logger.info("Train application df shape: {}".format(df_train.shape))
         logger.info("Test application df shape: {}".format(df_test.shape))
 
-    with timer("Add mcc time aggregate average feature"):
-        df = pd.read_csv("../features/average_mcc_median_conam_in_past_7_days.csv").iloc[:,1:]
-        df_train = df_train.merge(df, on = "mcc", how = "left")
-        df_test = df_test.merge(df, on = "bacno", how = "left")
+    # with timer("Add lstm latent features"):
+    #     # df = pd.read_csv("../features/average_bacno_min_conam_in_past_7_days.csv").iloc[:,1:]
+    #     # df_train = df_train.merge(df, on = "bacno", how = "left")
+    #     # df_test = df_test.merge(df, on = "bacno", how = "left")
 
-        df = pd.read_csv("../features/average_mcc_max_conam_in_past_7_days.csv").iloc[:,1:]
-        df_train = df_train.merge(df, on = "mcc", how = "left")
-        df_test = df_test.merge(df, on = "bacno", how = "left")
+    #     # df = pd.read_csv("../features/average_bacno_max_conam_in_past_7_days.csv").iloc[:,1:]
+    #     # df_train = df_train.merge(df, on = "bacno", how = "left")
+    #     # df_test = df_test.merge(df, on = "bacno", how = "left")
 
-        df = pd.read_csv("../features/average_mcc_min_conam_in_past_7_days.csv").iloc[:,1:]
-        df_train = df_train.merge(df, on = "mcc", how = "left")
-        df_test = df_test.merge(df, on = "bacno", how = "left")
+    #     df = pd.read_csv("../features/lstm_features.csv")
+    #     df_train = df_train.merge(df, on = "txkey", how = "left")
+    #     df_test = df_test.merge(df, on = "txkey", how = "left")
 
-        df = pd.read_csv("../features/average_mcc_mean_conam_in_past_7_days.csv").iloc[:,1:]
-        df_train = df_train.merge(df, on = "mcc", how = "left")
-        df_test = df_test.merge(df, on = "bacno", how = "left")
+    # with timer("Add mcc time aggregate average feature"):
+    #     df = pd.read_csv("../features/average_mcc_median_conam_in_past_7_days.csv")
+    #     df_train = df_train.merge(df, on = "mcc", how = "left")
+    #     df_test = df_test.merge(df, on = "mcc", how = "left")
 
-        df = pd.read_csv("../features/average_mcc_std_conam_in_past_7_days.csv").iloc[:,1:]
-        df_train = df_train.merge(df, on = "mcc", how = "left")
-        df_test = df_test.merge(df, on = "bacno", how = "left")
+    #     df = pd.read_csv("../features/average_mcc_max_conam_in_past_7_days.csv")
+    #     df_train = df_train.merge(df, on = "mcc", how = "left")
+    #     df_test = df_test.merge(df, on = "mcc", how = "left")
 
+    #     df = pd.read_csv("../features/average_mcc_min_conam_in_past_7_days.csv")
+    #     df_train = df_train.merge(df, on = "mcc", how = "left")
+    #     df_test = df_test.merge(df, on = "mcc", how = "left")
+
+    #     df = pd.read_csv("../features/average_mcc_mean_conam_in_past_7_days.csv")
+    #     df_train = df_train.merge(df, on = "mcc", how = "left")
+    #     df_test = df_test.merge(df, on = "mcc", how = "left")
+
+    #     df = pd.read_csv("../features/average_mcc_std_conam_in_past_7_days.csv")
+    #     df_train = df_train.merge(df, on = "mcc", how = "left")
+    #     df_test = df_test.merge(df, on = "mcc", how = "left")
+
+    #     logger.info("Train application df shape: {}".format(df_train.shape))
+    #     logger.info("Test application df shape: {}".format(df_test.shape))
+
+    # with timer("Add scity time aggregate feature"):
+    #     df = pd.read_csv("../features/scity_mean_conam_in_past_7_days.csv")
+    #     df_train = df_train.merge(df, on = ["scity","locdt"], how = "left")
+    #     df_test = df_test.merge(df, on = ["scity","locdt"], how = "left")
+
+    #     df = pd.read_csv("../features/scity_mean_conam_in_past_14_days.csv")
+    #     df_train = df_train.merge(df, on = ["scity","locdt"], how = "left")
+    #     df_test = df_test.merge(df, on = ["scity","locdt"], how = "left")
+
+    #     logger.info("Train application df shape: {}".format(df_train.shape))
+    #     logger.info("Test application df shape: {}".format(df_test.shape))
+
+    # with timer("Add stocn time aggregate feature"):
+    #     df = pd.read_csv("../features/stocn_mean_conam_in_past_7_days.csv")
+    #     df_train = df_train.merge(df, on = ["stocn","locdt"], how = "left")
+    #     df_test = df_test.merge(df, on = ["stocn","locdt"], how = "left")
+
+    #     df = pd.read_csv("../features/stocn_mean_conam_in_past_14_days.csv")
+    #     df_train = df_train.merge(df, on = ["stocn","locdt"], how = "left")
+    #     df_test = df_test.merge(df, on = ["stocn","locdt"], how = "left")
+        
+    #     logger.info("Train application df shape: {}".format(df_train.shape))
+    #     logger.info("Test application df shape: {}".format(df_test.shape))
+
+    # with timer("Add acqic time aggregate feature"):
+    #     df = pd.read_csv("../features/acqic_mean_conam_in_past_7_days.csv")
+    #     df_train = df_train.merge(df, on = ["acqic","locdt"], how = "left")
+    #     df_test = df_test.merge(df, on = ["acqic","locdt"], how = "left")
+
+    #     df = pd.read_csv("../features/acqic_mean_conam_in_past_14_days.csv")
+    #     df_train = df_train.merge(df, on = ["acqic","locdt"], how = "left")
+    #     df_test = df_test.merge(df, on = ["acqic","locdt"], how = "left")
+        
+    #     logger.info("Train application df shape: {}".format(df_train.shape))
+    #     logger.info("Test application df shape: {}".format(df_test.shape))
+
+    # with timer("Add mchno time aggregate feature"):
+    #     df = pd.read_csv("../features/mchno_mean_conam_in_past_7_days.csv")
+    #     df_train = df_train.merge(df, on = ["mchno","locdt"], how = "left")
+    #     df_test = df_test.merge(df, on = ["mchno","locdt"], how = "left")
+
+    #     df = pd.read_csv("../features/mchno_mean_conam_in_past_14_days.csv")
+    #     df_train = df_train.merge(df, on = ["mchno","locdt"], how = "left")
+    #     df_test = df_test.merge(df, on = ["mchno","locdt"], how = "left")
+        
+    #     logger.info("Train application df shape: {}".format(df_train.shape))
+    #     logger.info("Test application df shape: {}".format(df_test.shape))
+
+    # with timer("Add bacno time aggregate feature"):
+    #     df = pd.read_csv("../features/bacno_mean_conam_in_past_7_days.csv")
+    #     df_train = df_train.merge(df, on = ["bacno","locdt"], how = "left")
+    #     df_test = df_test.merge(df, on = ["bacno","locdt"], how = "left")
+
+    #     df = pd.read_csv("../features/bacno_mean_conam_in_past_14_days.csv")
+    #     df_train = df_train.merge(df, on = ["bacno","locdt"], how = "left")
+    #     df_test = df_test.merge(df, on = ["bacno","locdt"], how = "left")
+        
+    #     logger.info("Train application df shape: {}".format(df_train.shape))
+    #     logger.info("Test application df shape: {}".format(df_test.shape))
+
+    # with timer("Add mcc time aggregate feature"):
+    #     df = pd.read_csv("../features/mcc_mean_conam_in_past_7_days.csv")
+    #     df_train = df_train.merge(df, on = ["mcc","locdt"], how = "left")
+    #     df_test = df_test.merge(df, on = ["mcc","locdt"], how = "left")
+
+    #     df = pd.read_csv("../features/mcc_mean_conam_in_past_14_days.csv")
+    #     df_train = df_train.merge(df, on = ["mcc","locdt"], how = "left")
+    #     df_test = df_test.merge(df, on = ["mcc","locdt"], how = "left")
+        
+    #     logger.info("Train application df shape: {}".format(df_train.shape))
+    #     logger.info("Test application df shape: {}".format(df_test.shape))
+
+    # with timer("Add hcefg time aggregate feature"):
+    #     df = pd.read_csv("../features/hcefg_mean_conam_in_past_7_days.csv")
+    #     df_train = df_train.merge(df, on = ["hcefg","locdt"], how = "left")
+    #     df_test = df_test.merge(df, on = ["hcefg","locdt"], how = "left")
+
+    #     df = pd.read_csv("../features/hcefg_mean_conam_in_past_14_days.csv")
+    #     df_train = df_train.merge(df, on = ["hcefg","locdt"], how = "left")
+    #     df_test = df_test.merge(df, on = ["hcefg","locdt"], how = "left")
+        
+    #     logger.info("Train application df shape: {}".format(df_train.shape))
+    #     logger.info("Test application df shape: {}".format(df_test.shape))
+
+    # with timer("Add contp time aggregate feature"):
+    #     df = pd.read_csv("../features/contp_mean_conam_in_past_7_days.csv")
+    #     df_train = df_train.merge(df, on = ["contp","locdt"], how = "left")
+    #     df_test = df_test.merge(df, on = ["contp","locdt"], how = "left")
+
+    #     df = pd.read_csv("../features/contp_mean_conam_in_past_14_days.csv")
+    #     df_train = df_train.merge(df, on = ["contp","locdt"], how = "left")
+    #     df_test = df_test.merge(df, on = ["contp","locdt"], how = "left")
+        
+    #     logger.info("Train application df shape: {}".format(df_train.shape))
+    #     logger.info("Test application df shape: {}".format(df_test.shape))
+
+    # with timer("Add etymd time aggregate feature"):
+    #     df = pd.read_csv("../features/etymd_mean_conam_in_past_7_days.csv")
+    #     df_train = df_train.merge(df, on = ["etymd","locdt"], how = "left")
+    #     df_test = df_test.merge(df, on = ["etymd","locdt"], how = "left")
+
+    #     df = pd.read_csv("../features/etymd_mean_conam_in_past_14_days.csv")
+    #     df_train = df_train.merge(df, on = ["etymd","locdt"], how = "left")
+    #     df_test = df_test.merge(df, on = ["etymd","locdt"], how = "left")
+        
+    #     logger.info("Train application df shape: {}".format(df_train.shape))
+    #     logger.info("Test application df shape: {}".format(df_test.shape))
 
     # with timer("Add cano/bacno ratio feature"):
     #     from util import num_transaction
@@ -460,8 +583,6 @@ def main(args):
 
     #     logger.info("Train application df shape: {}".format(df_train.shape))
     #     logger.info("Test application df shape: {}".format(df_test.shape))
-
-
 
     # with timer("Add elapsed time feature"):
     #     df = pd.concat([df_train, df_test], axis = 0)
@@ -582,7 +703,9 @@ def main(args):
                                "day_hr_min_sec",
                                "cano_locdt_index",
                                "cano_len",
-                               "bacno_len"
+                               "bacno_len",
+                               "agg_mchno_mean_conam_in_past_14_days",
+                               "agg_mchno_mean_conam_in_past_7_days",
                                ], axis = 1, inplace = True, errors = "ignore")
 
         logger.info("Train application df shape: {}".format(df_train.shape))

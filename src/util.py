@@ -270,9 +270,9 @@ def kfold_lightgbm(df_train, df_test, num_folds, args, logger, stratified = Fals
                 )
         else:
             clf = lgb.LGBMClassifier(
-                n_jobs = -1,
-                n_estimators=10000,
-                learning_rate=0.02, # 0.02
+                n_jobs = 19,
+                n_estimators=20000,
+                learning_rate=0.001, # 0.02
                 num_leaves=int(args.NUM_LEAVES),
                 colsample_bytree=args.COLSAMPLE_BYTREE,
                 subsample=args.SUBSAMPLE,
@@ -303,7 +303,7 @@ def kfold_lightgbm(df_train, df_test, num_folds, args, logger, stratified = Fals
                     eval_set=[(train_x, train_y), (valid_x, valid_y)], 
                     eval_metric= lgb_f1_score, 
                     verbose= False, 
-                    early_stopping_rounds= 100, 
+                    early_stopping_rounds= 200, 
                     categorical_feature='auto') # early_stopping_rounds= 200
         # probabilty belong to class1(fraud)
         oof_preds[valid_idx] = clf.predict_proba(valid_x, num_iteration=clf.best_iteration_)[:, 1]

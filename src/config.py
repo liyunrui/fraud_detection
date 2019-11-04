@@ -1241,6 +1241,12 @@ class Configs:
          'sum_conam_BY_bacno_day_hr_min',
          'median_conam_BY_bacno_stocn_day_hr_min_sec',
          'max_conam_BY_stocn',
+         # 11/2
+         'average_mcc_median_conam_in_past_7_days',
+         'average_mcc_mean_conam_in_past_7_days',
+         'average_bacno_mean_conam_in_past_7_days',
+         'var_iterm_BY_etymd',
+         'mean_iterm_BY_etymd',
     ] # list of feature names
 
     FEATURE_USELESSNESS = ['var_iterm_BY_contp', 'median_iterm_BY_stscd', 'median_iterm_BY_stocn', 'median_iterm_BY_scity', 
@@ -1284,7 +1290,9 @@ class Configs:
     'max_conam_BY_flbmk', 'sum_conam_BY_ovrlt',
 
     # 10/29
-    "min_conam_BY_contp"
+    "min_conam_BY_contp",
+    # 11/1
+    'hcefg', 'max_iterm_BY_scity', 'sum_iterm_BY_mchno', 'var_iterm_BY_acqic',
      # 'sum_time_elapsed_between_last_transactions_BY_bacno_cano', 'sum_iterm_BY_contp', 'max_iterm_BY_acqic',
      # 'mean_iterm_BY_contp', 'mean_iterm_BY_csmcu', 'max_iterm_BY_contp', 
      # 'mean_time_elapsed_between_last_transactions_BY_bacno_cano', 
